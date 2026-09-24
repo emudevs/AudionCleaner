@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -43,7 +44,7 @@ def run(cmd, *, check=True, capture=False):
 
 
 def venv_python() -> Path:
-    return VENV / "Scripts" / "python.exe"
+    return VENV / "Scripts" / "python.exe" if os.name == "nt" else VENV / "bin" / "python"
 
 
 def venv_pip() -> list[str]:
@@ -77,7 +78,7 @@ def make_venv(force=False) -> None:
 
 
 def install_packages(force=False) -> dict:
-    gpu = has_nvidia()
+    gpu = os.name == "nt" and has_nvidia()
 
     if force:
         marker_ok = False
@@ -168,47 +169,96 @@ def install_packages(force=False) -> dict:
     return {"gpu_expected": gpu}
 
 
-def install_ffmpeg(force=False) -> tuple[str, str]:
-    system_ffmpeg = shutil.which("ffmpeg")
-    system_ffprobe = shutil.which("ffprobe")
+def download_ffmpeg(archive: Path) -> None:
+    urls = []
+    try:
+        request = urllib.request.Request("https://api.github.com/repos/GyanD/codexffmpeg/releases/latest",
+                                         headers={"User-Agent": "AnimeAudioCleaner"})
+        with urllib.request.urlopen(request, timeout=15) as response:
+            release = json.load(response)
+        urls = [a["browser_download_url"] for a in release.get("assets", [])
+                if a["name"].endswith("-essentials_build.zip")
+                and a["browser_download_url"].startswith("https://github.com/GyanD/codexffmpeg/")]
+    except Exception as exc:
+        log(f"GitHub download discovery unavailable: {exc}")
+    urls.append(FFMPEG_URL)
+    errors = []
+    for url in urls:
+        try:
+            log(f"Downloading FFmpeg: {url}")
+            started = time.monotonic()
+            with urllib.request.urlopen(url, timeout=20) as response, archive.open("wb") as target:
+                while True:
+                    if time.monotonic() - started > 300:
+                        raise TimeoutError("FFmpeg download exceeded five minutes")
+                    chunk = response.read1(1024 * 1024)
+                    if not chunk:
+                        break
+                    target.write(chunk)
+            if not zipfile.is_zipfile(archive):
+                raise RuntimeError("Server did not return a ZIP archive")
+            return
+        except Exception as exc:
+            errors.append(str(exc))
+            log(f"Download failed, trying alternate source: {exc}")
+    raise RuntimeError("; ".join(errors))
 
-    if not force and system_ffmpeg and system_ffprobe:
-        log("FFmpeg найден в PATH.")
-        return system_ffmpeg, system_ffprobe
+
+def valid_media_tool(path: Path) -> bool:
+    try:
+        result = subprocess.run([str(path), "-version"], capture_output=True,
+                                timeout=15, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+        return result.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def install_ffmpeg(force=False) -> tuple[str, str]:
+    if os.name != "nt":
+        ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
+        if ffmpeg and ffprobe and all(valid_media_tool(Path(p)) for p in (ffmpeg, ffprobe)):
+            return ffmpeg, ffprobe
+        brew = shutil.which("brew") if sys.platform == "darwin" else None
+        if brew:
+            log("Installing FFmpeg + FFprobe with Homebrew...")
+            run([brew, "install", "ffmpeg"])
+            ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
+            if ffmpeg and ffprobe and all(valid_media_tool(Path(p)) for p in (ffmpeg, ffprobe)):
+                return ffmpeg, ffprobe
+        raise RuntimeError("Install Homebrew (brew.sh) on macOS, then relaunch to install FFmpeg automatically.")
 
     local_root = TOOLS_DIR / "ffmpeg"
-    ffmpeg_exe = local_root / "bin" / "ffmpeg.exe"
-    ffprobe_exe = local_root / "bin" / "ffprobe.exe"
-
-    if not force and ffmpeg_exe.exists() and ffprobe_exe.exists():
-        log("Локальный FFmpeg уже установлен.")
-        return str(ffmpeg_exe), str(ffprobe_exe)
-
-    TOOLS_DIR.mkdir(parents=True, exist_ok=True)
-    log("Скачиваю FFmpeg essentials...")
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
-        archive = tmp / "ffmpeg.zip"
-        urllib.request.urlretrieve(FFMPEG_URL, archive)
-
-        unpack = tmp / "unpack"
-        unpack.mkdir()
-        with zipfile.ZipFile(archive, "r") as zf:
-            zf.extractall(unpack)
-
-        roots = [p for p in unpack.iterdir() if p.is_dir()]
-        if not roots:
-            raise RuntimeError("Не удалось распаковать FFmpeg.")
-
-        src = roots[0]
-        if local_root.exists():
-            shutil.rmtree(local_root, ignore_errors=True)
-        shutil.copytree(src, local_root)
-
-    if not ffmpeg_exe.exists() or not ffprobe_exe.exists():
-        raise RuntimeError("FFmpeg скачан, но ffmpeg.exe/ffprobe.exe не найдены.")
-
-    return str(ffmpeg_exe), str(ffprobe_exe)
+    binaries = [local_root / "bin" / name for name in ("ffmpeg.exe", "ffprobe.exe")]
+    if force or not all(valid_media_tool(p) for p in binaries):
+        TOOLS_DIR.mkdir(parents=True, exist_ok=True)
+        log("Installing local FFmpeg + FFprobe (first launch or repair)...")
+        try:
+            with tempfile.TemporaryDirectory(dir=TOOLS_DIR) as temporary:
+                staging = Path(temporary)
+                archive = staging / "ffmpeg.zip"
+                download_ffmpeg(archive)
+                unpack = staging / "unpack"
+                with zipfile.ZipFile(archive) as zf:
+                    for item in zf.infolist():
+                        target = (unpack / item.filename).resolve()
+                        if not target.is_relative_to(unpack.resolve()):
+                            raise RuntimeError("Unsafe FFmpeg archive path")
+                    zf.extractall(unpack)
+                candidates = list(unpack.glob("*/bin/ffmpeg.exe"))
+                if len(candidates) != 1:
+                    raise RuntimeError("FFmpeg archive does not contain the expected binaries")
+                package = candidates[0].parent.parent
+                if not all(valid_media_tool(package / "bin" / name) for name in ("ffmpeg.exe", "ffprobe.exe")):
+                    raise RuntimeError("Downloaded FFmpeg/FFprobe failed the launch check")
+                shutil.copytree(package, local_root, dirs_exist_ok=True)
+        except Exception as exc:
+            raise RuntimeError(f"FFmpeg installation failed: {exc}. Check your connection and rerun start.bat/the EXE.") from exc
+    if not all(valid_media_tool(p) for p in binaries):
+        raise RuntimeError("Local FFmpeg/FFprobe could not be started. Close running jobs and retry setup.")
+    # Available to dependency diagnostics and all subprocesses of this bootstrap.
+    os.environ["PATH"] = str(binaries[0].parent) + os.pathsep + os.environ.get("PATH", "")
+    log("Local FFmpeg and FFprobe are ready.")
+    return tuple(str(p) for p in binaries)
 
 
 def environment_report() -> dict:
@@ -269,9 +319,9 @@ def main() -> int:
         log(f"Anime Audio Cleaner {APP_VERSION}")
         log("=" * 64)
 
+        ffmpeg, ffprobe = install_ffmpeg(force=args.repair)
         make_venv(force=args.repair)
         install_info = install_packages(force=args.repair)
-        ffmpeg, ffprobe = install_ffmpeg(force=False)
 
         report = environment_report()
         runtime = {

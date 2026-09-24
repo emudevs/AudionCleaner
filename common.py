@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -141,6 +142,10 @@ def save_runtime(runtime: dict) -> None:
 
 
 def ffmpeg_path() -> str:
+    local = TOOLS_DIR / "ffmpeg" / "bin" / "ffmpeg.exe"
+    if local.is_file():
+        return str(local)
+
     runtime = load_runtime()
     p = runtime.get("ffmpeg")
     if p and Path(p).exists():
@@ -150,14 +155,14 @@ def ffmpeg_path() -> str:
     if p:
         return p
 
-    local = TOOLS_DIR / "ffmpeg" / "bin" / "ffmpeg.exe"
-    if local.exists():
-        return str(local)
-
     raise FileNotFoundError("FFmpeg не найден. Запусти repair.bat.")
 
 
 def ffprobe_path() -> str:
+    local = TOOLS_DIR / "ffmpeg" / "bin" / "ffprobe.exe"
+    if local.is_file():
+        return str(local)
+
     runtime = load_runtime()
     p = runtime.get("ffprobe")
     if p and Path(p).exists():
@@ -167,8 +172,24 @@ def ffprobe_path() -> str:
     if p:
         return p
 
-    local = TOOLS_DIR / "ffmpeg" / "bin" / "ffprobe.exe"
-    if local.exists():
-        return str(local)
-
     raise FileNotFoundError("FFprobe не найден. Запусти repair.bat.")
+
+
+def configure_media_path() -> None:
+    """Expose configured tools to audio-separator, pydub and other subprocesses."""
+    runtime = load_runtime()
+    folders = []
+    local = TOOLS_DIR / "ffmpeg" / "bin"
+    if local.is_dir():
+        folders.append(str(local))
+    for key in ("ffmpeg", "ffprobe"):
+        path = runtime.get(key)
+        if path and Path(path).is_file():
+            folder = str(Path(path).parent)
+            if folder not in folders:
+                folders.append(folder)
+    existing = os.environ.get("PATH", "").split(os.pathsep)
+    os.environ["PATH"] = os.pathsep.join(folders + [p for p in existing if p not in folders])
+
+
+configure_media_path()
