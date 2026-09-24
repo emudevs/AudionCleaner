@@ -34,6 +34,6 @@
   "auto_start": true,
   "keep_prepared_audio": false,
   "keep_raw_separated": false,
-  "last_dir": "C:\\Users\\Satan\\Videos",
-  "model_cache_dir": "E:\\AI\\AnimeAudioCleaner\\models"
+  "last_dir": "C:\\Videos",
+  "model_cache_dir": "E:\\AudionCleaner\\models"
 }
