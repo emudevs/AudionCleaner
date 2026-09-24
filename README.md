@@ -32,7 +32,7 @@ FFmpeg and FFprobe are detected from `PATH` or installed locally by the bootstra
 
 1. Extract the project into a writable folder, such as `D:\Tools\AnimeAudioCleaner`.
 2. Run **`start.bat`**.
-3. Allow the first-time setup to finish. It creates `.venv`, installs PyTorch, `audio-separator==0.47.0`, ONNX Runtime, and supporting packages, then prepares FFmpeg.
+3. Allow the first-time setup to finish. It creates `.venv`, installs PyTorch, `audio-separator==0.47.0`, ONNX Runtime, and supporting packages, then prepares FFmpeg (if not, install it `pip install ffmpeg`).
 4. Review your processing and output settings. **Auto-start after import is enabled by default**; disable it if you want to review each file before processing.
 5. Click **Import** (`Импорт…`) or drag a media file onto the source panel.
 6. If prompted, select the audio track to process.
