@@ -29,10 +29,10 @@ jobs:
             os: windows-2022
             command: npx electron-builder --config electron-builder.config.cjs --win nsis --publish never
           - platform: macos-intel
-            os: macos-14
+            os: macos-15-intel
             command: npx electron-builder --config electron-builder.config.cjs --mac dmg zip --publish never
           - platform: macos-arm64
-            os: macos-15-arm64
+            os: macos-15
             command: npx electron-builder --config electron-builder.config.cjs --mac dmg zip --publish never
           - platform: linux
             os: ubuntu-22.04
@@ -58,6 +58,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify macOS build architecture
+        if: startsWith(matrix.platform, 'macos-')
+        shell: bash
+        run: |
+          echo "Runner architecture: $(uname -m)"
+          if [ "${{ matrix.platform }}" = 'macos-intel' ]; then
+            test "$(uname -m)" = 'x86_64'
+          else
+            test "$(uname -m)" = 'arm64'
+          fi
       - name: Install npm dependencies
         run: npm ci --no-audit --no-fund
       - name: Verify keyboard shortcuts and editor core
