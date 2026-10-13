@@ -1,0 +1,88 @@
+/* The lane area is the only vertical scroller. Timeline navigation stays
+   visible while tall audio lanes scroll underneath it. */
+.timeline-root>.timeline-editor{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-y:contain;
+  scrollbar-gutter:stable;
+}
+.timeline-root .timeline-columns{
+  min-height:100%;
+  align-items:start;
+}
+.timeline-root .timeline-sidebar-fixed{
+  align-self:stretch;
+}
+.timeline-root .timeline-sidebar-fixed>.timeline-time-readout{
+  position:sticky;
+  top:0;
+  z-index:28;
+  background:#111214;
+  isolation:isolate;
+}
+.timeline-root .timeline-time-column>.timeline-ruler-fixed{
+  position:sticky;
+  top:0;
+  z-index:28;
+  height:37px;
+  min-height:37px;
+  background:#111214;
+}
+.timeline-root .timeline-ruler-playhead{
+  position:absolute;
+  top:28px;
+  z-index:2;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:9px solid #767dff;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+.timeline-root .timeline-time-canvas{
+  /* Ruler occupies a real, sticky row immediately above the canvas. */
+  min-height:0;
+}
+.timeline-root .timeline-time-canvas>.timeline-playhead,
+.timeline-root .timeline-time-canvas>.timeline-ghost{
+  top:0;
+}
+.timeline-root .timeline-time-scroll{
+  /* Hide this nested scrollbar; the persistent footer owns the x-axis. */
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+}
+.timeline-root .timeline-time-scroll::-webkit-scrollbar{
+  display:none;width:0;height:0;
+}
+.timeline-root>.timeline-bottom-scrollbar{
+  flex:0 0 16px;
+  display:grid;
+  grid-template-columns:var(--track-sidebar) minmax(0,1fr);
+  width:100%;
+  min-width:0;
+  height:16px;
+  background:#111214;
+  padding:0;
+  z-index:30;
+}
+.timeline-root .timeline-bottom-scrollbar-label{
+  height:16px;
+  background:#111214;
+}
+.timeline-root .timeline-horizontal-scroll{
+  width:100%;
+  min-width:0;
+  height:16px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-color:#55566c #131419;
+  scrollbar-width:thin;
+  overscroll-behavior-x:contain;
+}
+.timeline-root .timeline-horizontal-extent{
+  height:1px;
+  pointer-events:none;
+}

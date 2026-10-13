@@ -1,0 +1,47 @@
+/*
+ * The label column is fixed, and the filenames inside the clips must remain
+ * fixed as well. The waveform and thumbnail still scroll and zoom normally.
+ */
+.timeline-pinned-clip-labels{
+  position:absolute;
+  inset:37px 0 auto 0; /* Ruler is outside the scrollable canvas. */
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  pointer-events:none;
+  z-index:9;
+  overflow:hidden;
+}
+.timeline-pinned-clip-labels .pinned-row{
+  position:relative;
+  box-sizing:border-box;
+  flex:0 0 48px;
+  height:48px;
+  width:100%;
+  min-width:0;
+  pointer-events:none;
+}
+.timeline-pinned-clip-labels .pinned-ruler-space{
+  height:37px;
+  flex-basis:37px;
+}
+.timeline-pinned-clip-labels .pinned-add-space{
+  height:26px;
+  flex-basis:26px;
+}
+.timeline-pinned-clip-labels .pinned-clip-name span{
+  position:absolute;
+  top:5px;
+  left:var(--caption-inset,10px);
+  right:10px;
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
+  font-weight:600;
+  line-height:13px;
+  color:#e6f4f8;
+  text-shadow:0 1px 2px #002436;
+}
+.timeline-pinned-clip-labels .pinned-empty-space{height:48px}

@@ -1,0 +1,52 @@
+# Runtime and dependencies are downloaded automatically.
+.runtime/
+.venv/
+.build-venv/
+node_modules/
+**/node_modules/
+desktop/dist/
+dist-installers/
+tools/
+models/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+*.log
+*.tmp
+*.part
+*.part.wav
+.cache/
+.temp/
+dist/
+build/
+
+# Personal settings, device paths, model caches and tokens.
+runtime.json
+settings.json
+.installed.json
+.ready.json
+*.aclproj
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# Archives and editor-local configuration.
+*.zip
+*.7z
+.vscode/
+.idea/
+
+# Large user media must never be committed.
+*.wav
+*.flac
+*.mp3
+*.mp4
+*.mkv
+*.mov
+*.ckpt
+*.pth
+*.onnx
+*.safetensors

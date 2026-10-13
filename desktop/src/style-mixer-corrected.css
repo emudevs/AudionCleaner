@@ -1,0 +1,65 @@
+/* Fader must use ONE shared coordinate system for its bar, pointer and both end caps.
+   Native input[type=range] thumbs use browser-specific insets and were misaligning. */
+.mixer-track .mixer-meter{
+  position:relative;
+  padding:2px 0;
+  overflow:visible;
+}
+.mixer-meter .meter-fader-visual{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:0;
+  z-index:5;
+  pointer-events:none;
+  transform:translateX(0);
+}
+.mixer-meter .meter-fader-line{
+  position:absolute;
+  width:3px;
+  top:3px;
+  bottom:3px;
+  left:-1.5px;
+  border-radius:2px;
+  background:#f2f2f5;
+  box-shadow:0 0 2px #000b;
+}
+.mixer-meter .meter-fader-end{
+  position:absolute;
+  left:0;
+  width:7px;
+  height:7px;
+  transform:translateX(-50%);
+  background:#f6f6f8;
+  border-radius:50%;
+  box-shadow:0 1px 2px #0009;
+}
+.mixer-meter .meter-fader-end-top{top:0}
+.mixer-meter .meter-fader-end-bottom{bottom:0}
+.mixer-meter .meter-fader-surface{
+  position:absolute;
+  inset:0;
+  display:block;
+  z-index:6;
+  cursor:ew-resize;
+  touch-action:none;
+  user-select:none;
+  border:0;
+  outline:0;
+  background:transparent;
+}
+.mixer-meter .meter-fader-surface:focus-visible{
+  outline:1px solid #7478ff;
+  outline-offset:2px;
+}
+.mixer-meter-disabled .meter-fader-line,
+.mixer-meter-disabled .meter-fader-end{background:#55565d}
+.mixer-meter-disabled .meter-fader-surface{cursor:default}
+.mixer-meter .meter-scale{overflow:visible}
+.mixer-meter .meter-max{
+  top:0;
+  right:0;
+  background:#050506;
+  font-size:9px;
+  padding:0 1px 0 3px;
+}

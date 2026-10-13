@@ -1,0 +1,308 @@
+/* Unified ACL modal style: properties, keyboard reference, about. */
+:root{
+ --acl-dialog-bg:#15161b;
+ --acl-dialog-border:#30323b;
+ --acl-dialog-panel:#0f1015;
+ --acl-dialog-text:#ebeaf1;
+ --acl-dialog-muted:#9498a6;
+}
+.acl-dialog-shade,
+.dialog-shade.lane-props-shade{
+ position:fixed;
+ inset:0;
+ z-index:3200;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:24px;
+ background:rgba(0,0,0,.74);
+ backdrop-filter:none;
+}
+.acl-modal,
+.lane-props-shade .lane-props-dialog{
+ display:flex;flex-direction:column;
+ width:min(660px,calc(100vw - 48px));
+ max-height:min(84vh,850px);
+ min-height:0;
+ overflow:hidden;
+ background:var(--acl-dialog-bg);
+ border:1px solid var(--acl-dialog-border);
+ border-radius:12px;
+ box-shadow:0 24px 72px rgba(0,0,0,.6);
+ color:var(--acl-dialog-text);
+ outline:none;
+}
+.acl-help-modal{width:min(520px,calc(100vw - 32px));max-height:min(84vh,760px)}
+.acl-modal-header,
+.lane-props-shade .lane-props-heading{
+ flex:0 0 auto;
+ display:flex;align-items:center;justify-content:space-between;
+ gap:12px;min-height:60px;
+ padding:14px 20px;
+ border-bottom:1px solid #272932;
+ background:#191a20;
+}
+.acl-modal-header h2,
+.lane-props-shade .lane-props-heading h3{
+ margin:0;
+ font-size:15px;
+ font-weight:650;
+ color:#f1f0f6;
+ line-height:1.35;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.acl-modal-titles{min-width:0}
+.acl-modal-titles p,
+.lane-props-heading .acl-dialog-subtitle{
+ margin:4px 0 0;color:#8e92a0;font-size:11px;line-height:1.4;
+}
+.acl-modal-close,
+.lane-props-shade .lane-props-heading .acl-modal-close{
+ display:grid;place-items:center;flex:0 0 29px;
+ width:29px;height:29px;
+ background:transparent;border:0;border-radius:7px;
+ padding:0;color:#aeb0c0;font-size:22px;font-weight:300;line-height:1;
+}
+.acl-modal-close:hover,
+.lane-props-shade .lane-props-heading .acl-modal-close:hover{
+ background:#30313b;color:white;
+}
+.acl-modal-body,
+.lane-props-shade .lane-props-scroll{
+ flex:1 1 auto;min-height:0;overflow:auto;
+ padding:18px 20px;
+ scrollbar-width:thin;
+ scrollbar-color:#444652 transparent;
+}
+.acl-modal-body::-webkit-scrollbar,
+.lane-props-shade .lane-props-scroll::-webkit-scrollbar{width:8px}
+.acl-modal-body::-webkit-scrollbar-thumb,
+.lane-props-shade .lane-props-scroll::-webkit-scrollbar-thumb{background:#3b3e49;border-radius:6px}
+.acl-modal-footer,
+.lane-props-shade .lane-props-actions{
+ display:flex;justify-content:flex-end;align-items:center;
+ gap:8px;min-height:58px;padding:10px 18px;
+ border-top:1px solid #292b34;background:#191a20;
+ flex:0 0 auto;
+}
+.acl-modal-footer button,
+.lane-props-shade .lane-props-actions button{
+ min-height:32px;padding:7px 13px;
+ background:#23252c;border:1px solid #343640;
+ color:#dfdfe9;border-radius:7px;
+ font-size:12px;font-weight:550;
+}
+.acl-modal-footer button:hover:not(:disabled),
+.lane-props-shade .lane-props-actions button:hover:not(:disabled){background:#30333d}
+.acl-modal-footer button.primary,
+.lane-props-shade .lane-props-actions button.primary{
+ background:#5c62f0;border-color:#5c62f0;color:#fff;
+}
+.acl-modal-footer button.primary:hover:not(:disabled),
+.lane-props-shade .lane-props-actions button.primary:hover:not(:disabled){
+ background:#7277ff;
+}
+/* Properties window: the information and controls share the same geometry. */
+.lane-props-shade .lane-props-meta{
+ display:grid;
+ grid-template-columns:minmax(0,1.35fr) minmax(130px,1fr);
+ gap:14px 20px;
+ background:#101116;
+ padding:15px 16px;
+ border:1px solid #292a33;
+ border-radius:9px;
+}
+.lane-props-shade .lane-props-meta strong{
+ font-size:10px;color:#8e92ab;font-weight:550;
+}
+.lane-props-shade .lane-props-meta span{font-size:12px;color:#ececf3}
+.lane-props-shade .lane-props-meta p{
+ padding:10px 0 0;margin:0;
+ border-top:1px solid #242632;
+ color:#9297a5;
+}
+.lane-props-shade .lane-props-scroll h4{
+ margin:18px 0 9px;
+ color:#e8e8ee;font-size:12px;font-weight:650;
+}
+.lane-props-shade .settings-card{
+ padding:11px 12px;border:1px solid #22242c;
+ background:#101116;border-radius:9px;
+}
+.lane-props-shade .settings-subgroup{
+ border-radius:8px;background:#171820;
+}
+.lane-props-shade .settings-heading,
+.lane-props-shade .settings-subheading{font-size:12px}
+.lane-props-shade .setting select,
+.lane-props-shade .setting input{
+ background-color:#17181e;border:1px solid #32343e;color:#d8dae2;
+}
+.lane-props-shade .lane-props-note{
+ margin-top:13px;background:#1a1b23;
+ border-left:2px solid #676bea;
+ border-radius:3px 7px 7px 3px;
+ padding:10px 12px;line-height:1.6;
+ color:#aeb0c2;
+}
+/* Keyboard dialog and About dialog. */
+.acl-help-section-heading{
+ font-size:11px;color:#8d91a2;font-weight:650;
+ margin-bottom:9px;
+}
+.acl-shortcut-grid{
+ display:flex;flex-direction:column;
+ border:1px solid #272933;border-radius:9px;overflow:hidden;
+ background:#101116;
+}
+.acl-shortcut-row{
+ min-height:37px;display:flex;align-items:center;justify-content:space-between;
+ gap:10px;padding:8px 12px;
+ border-bottom:1px solid #23252e;font-size:12px;
+}
+.acl-shortcut-row:last-child{border-bottom:0}
+.acl-shortcut-row>span{min-width:0;color:#dadbe3}
+.acl-shortcut-chords{display:flex;align-items:center;gap:4px;justify-content:flex-end;flex-shrink:0}
+.acl-shortcut-chords kbd{
+ white-space:nowrap;font-family:inherit;
+ color:#c5c7ff;font-size:10px;font-weight:600;
+ border:1px solid #393b51;border-radius:5px;
+ background:#252735;padding:4px 7px;
+}
+.acl-help-hint{font-size:11px;color:#8c8f9d;margin:13px 2px 1px}
+.acl-about-identity{
+ display:flex;gap:13px;align-items:center;
+ border:1px solid #30313d;background:#101116;
+ padding:16px;border-radius:9px;
+}
+.acl-about-identity strong{display:block;font-size:15px;margin-bottom:5px}
+.acl-about-identity span{font-size:11px;color:#a5a8c2}
+.acl-about-mark{
+ width:46px;height:46px;flex:0 0 46px;
+ border-radius:11px;background:#292c56;
+ display:grid;place-items:center;
+}
+.acl-about-mark img{width:25px;height:25px}
+.acl-about-description{
+ color:#bbc0cb;font-size:12px;line-height:1.7;margin:15px 0;
+}
+.acl-about-details{
+ background:#101116;border:1px solid #272933;border-radius:9px;
+ display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1.2fr);
+ gap:12px;padding:14px;font-size:11px;
+}
+.acl-about-details span{color:#9699a8}
+.acl-about-details strong{color:#d9dbe6;font-weight:550}
+@media(max-height:600px){
+ .acl-dialog-shade,.dialog-shade.lane-props-shade{padding:12px}
+ .acl-modal,.lane-props-shade .lane-props-dialog{max-height:calc(100vh - 24px)}
+}
+
+/* Unified, native-looking 40px captions for all in-app modals.
+   Unlike an OS window these are React dialogs, so the close control is
+   styled to match the native caption button without creating child windows. */
+.acl-dialog-shade .acl-modal-header,
+.lane-props-shade .lane-props-heading{
+  height:40px;min-height:40px;max-height:40px;
+  padding:0 0 0 15px;
+  background:#0b0c0e;
+  border-bottom:1px solid #252630;
+  gap:0;
+  flex:0 0 40px;
+}
+.acl-dialog-shade .acl-modal-titles,
+.lane-props-shade .acl-modal-titles{
+  min-width:0;flex:1;overflow:hidden;
+}
+.acl-dialog-shade .acl-modal-header h2,
+.lane-props-shade .lane-props-heading h3{
+  display:block;
+  width:100%;
+  margin:0;
+  font-size:13px;
+  line-height:40px;
+  font-weight:650;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.acl-dialog-shade .acl-modal-titles p,
+.lane-props-shade .acl-dialog-subtitle{display:none}
+.acl-dialog-shade .acl-modal-close,
+.lane-props-shade .lane-props-heading .acl-modal-close{
+  position:relative;
+  flex:0 0 46px;
+  width:46px;height:40px;
+  font-size:0;
+  color:#d6d7dc;
+  border:0;border-radius:0;
+  background:transparent;
+}
+.acl-dialog-shade .acl-modal-close::before,
+.acl-dialog-shade .acl-modal-close::after,
+.lane-props-shade .lane-props-heading .acl-modal-close::before,
+.lane-props-shade .lane-props-heading .acl-modal-close::after{
+  content:"";
+  position:absolute;
+  top:12px;left:22px;
+  width:1.5px;height:16px;
+  background:currentColor;
+}
+.acl-dialog-shade .acl-modal-close::before,
+.lane-props-shade .lane-props-heading .acl-modal-close::before{
+  transform:rotate(45deg);
+}
+.acl-dialog-shade .acl-modal-close::after,
+.lane-props-shade .lane-props-heading .acl-modal-close::after{
+  transform:rotate(-45deg);
+}
+.acl-dialog-shade .acl-modal-close:hover:not(:disabled),
+.lane-props-shade .lane-props-heading .acl-modal-close:hover:not(:disabled){
+  background:#c33344;
+  color:#fff;
+}
+
+/* Export notification: long Japanese/Cyrillic filenames stay on one line. */
+.toast-export{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:4800;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  max-width:min(560px,calc(100vw - 40px));
+  min-height:44px;
+  padding:9px 10px 9px 13px;
+  background:#1a1b21;
+  border:1px solid #3a3d4b;
+  border-radius:9px;
+  box-shadow:0 10px 35px #0009;
+  color:#e7e9f0;
+  font-size:12px;
+}
+.toast-export .toast-export-check{
+  display:grid;place-items:center;
+  flex:0 0 19px;width:19px;height:19px;
+  border-radius:50%;
+  background:#29483e;color:#b7f0da;
+  font-size:12px;font-weight:700;
+}
+.toast-export .toast-export-text{
+  min-width:0;flex:1;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.toast-export button{
+  width:27px;height:27px;flex:0 0 27px;
+  padding:0;border:0;
+  display:grid;place-items:center;
+  background:transparent;
+  border-radius:5px;
+  color:#b8bac8;
+  font-size:18px;
+}
+.toast-export button:hover{background:#30323b;color:#fff}

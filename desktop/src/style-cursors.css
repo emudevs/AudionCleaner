@@ -1,0 +1,116 @@
+/* ACL cursor artwork from Icons/cursor_*.svg.
+   The copies in desktop/public have intrinsic 32px size (original SVGs
+   remain untouched). Hotspots are expressed in these 32px image coordinates.
+   Always keep system cursor fallbacks for unsupported SVG cursor renderers. */
+:root {
+  --acl-cursor-default: url('/cursor.svg') 1 1, default;
+  --acl-cursor-pointer: url('/cursor_pointer.svg') 10 4, pointer;
+  --acl-cursor-blade: url('/cursor_blade.svg') 16 16, crosshair;
+  --acl-cursor-crosshair: url('/cursor_crosshair.svg') 16 16, crosshair;
+  --acl-cursor-grab: url('/cursor_grab.svg') 15 10, grab;
+  --acl-cursor-grabbing: url('/cursor_grabbing.svg') 15 11, grabbing;
+  --acl-cursor-move: url('/cursor_move.svg') 16 16, move;
+  --acl-cursor-col: url('/cursor_col_resize.svg') 16 16, col-resize;
+  --acl-cursor-row: url('/cursor_row_resize.svg') 16 16, row-resize;
+  --acl-cursor-ew: url('/cursor_e_resize.svg') 16 16, ew-resize;
+  --acl-cursor-ns: url('/cursor_ns_resize.svg') 16 16, ns-resize;
+  --acl-cursor-text: url('/cursor_text.svg') 16 16, text;
+  --acl-cursor-progress: url('/cursor_progress.svg') 16 16, progress;
+  --acl-cursor-no-drop: url('/cursor_no_drop.svg') 16 16, not-allowed;
+  --acl-cursor-copy: url('/cursor_copy.svg') 8 4, copy;
+  --acl-cursor-nesw: url('/cursor_nesw_resize.svg') 16 16, nesw-resize;
+  --acl-cursor-nwse: url('/cursor_nwse_resize.svg') 16 16, nwse-resize;
+}
+
+html, body, .app, .editor-work, .timeline-root, .timeline-time-scroll {
+  cursor: var(--acl-cursor-default);
+}
+
+/* Common interactables. Specific drag and trim handles override these. */
+button:not(:disabled), a[href], select:not(:disabled), input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled), [role="button"], .audio-option,
+.timeline-empty, .video-scale-control, .preview-seek:not(:disabled) {
+  cursor: var(--acl-cursor-pointer);
+}
+button:disabled, input:disabled, select:disabled,
+.mixer-meter-disabled .meter-fader-surface, .preview-seek:disabled {
+  cursor: var(--acl-cursor-no-drop);
+}
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea, [contenteditable="true"], .timeline-sidebar-fixed .lane-rename,
+.timeline-sidebar-fixed .track-label[draggable="true"] b {
+  cursor: var(--acl-cursor-text);
+}
+input[type="range"]:not(:disabled), .preview-seek:not(:disabled),
+.meter-fader-surface, .balance-knob,
+.timeline-sidebar-fixed .lane-volume,
+.clip-fade-handle {
+  cursor: var(--acl-cursor-ew);
+}
+.clip-volume-line { cursor: var(--acl-cursor-ns); }
+
+.layout-v-resizer, .timeline-label-resize {
+  cursor: var(--acl-cursor-col);
+}
+.layout-h-resizer { cursor: var(--acl-cursor-row); }
+
+.timeline-sidebar-fixed .lane-grip,
+.timeline-time-column .audio-clip-region.clip-draggable {
+  cursor: var(--acl-cursor-grab);
+}
+.timeline-sidebar-fixed .lane-grip:active,
+.timeline-sidebar-fixed .moving-lane .lane-grip,
+.timeline-time-column .audio-clip-region.clip-draggable:active {
+  cursor: var(--acl-cursor-grabbing);
+}
+.timeline-time-canvas>.audio-lane .audio-clip-region.clip-locked {
+  cursor: var(--acl-cursor-default);
+}
+.timeline-ruler-scrub { cursor: var(--acl-cursor-crosshair); }
+.playhead-handle { cursor: var(--acl-cursor-ew); }
+
+/* Select the actual blade for editable clips only. Never cut Original. */
+.timeline-root.tool-blade .timeline-time-canvas>.audio-lane .audio-clip-region.clip-blade,
+.timeline-root.tool-blade .timeline-time-canvas>.audio-lane .audio-clip-region.clip-blade:hover,
+.timeline-root.tool-blade .timeline-time-canvas>.audio-lane .audio-clip-region.clip-blade:active {
+  cursor: var(--acl-cursor-blade);
+}
+
+/* With the blade selected, interactions inside the clip should cut rather
+   than accidentally drag a fade handle or its volume automation line. */
+.timeline-root.tool-blade .clip-fade-handle,
+.timeline-root.tool-blade .clip-volume-line,
+.timeline-root.tool-blade .clip-delete {
+  pointer-events: none;
+}
+.timeline-time-tooltip, .timeline-ghost, .timeline-range-overlay {
+  pointer-events: none;
+}
+
+/* Video frame grabbing with the zoomed preview. */
+.video-viewport.video-viewport-pannable,
+.video-viewport.video-viewport-pannable .video-stage {
+  cursor: var(--acl-cursor-grab);
+}
+.video-viewport.video-viewport-panning,
+.video-viewport.video-viewport-panning * {
+  cursor: var(--acl-cursor-grabbing) !important;
+}
+.processing-shade, .busy { cursor: var(--acl-cursor-progress); }
+.drag-overlay { cursor: var(--acl-cursor-copy); }
+
+/* Toolbar images are exact SVG assets, not font glyphs. */
+.timeline-edit-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.timeline-edit-tools button img {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 21px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}

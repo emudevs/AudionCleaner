@@ -1,0 +1,69 @@
+/* ACL non-destructive multitrack editor */
+.timeline-edit-tools{display:flex;align-items:center;gap:4px;padding:0 4px}
+.timeline-edit-tools button{
+  color:#aeb0c2;background:#1a1b21;border:1px solid #30323b;
+  height:25px;padding:3px 10px;border-radius:5px;cursor:pointer;
+  font-size:11px;display:flex;align-items:center;gap:6px
+}
+.timeline-edit-tools button.active{background:#303354;border-color:#656af8;color:#fff}
+.timeline-edit-tools button:hover{border-color:#656af8}
+.timeline-edit-tools button span{font-size:16px}
+.timeline-sidebar-fixed .track-label{min-width:0}
+.lane-grip{cursor:grab;color:#777888;font-size:14px;line-height:20px;user-select:none;padding:0 1px}
+.timeline-sidebar-fixed .track-label.moving-lane{opacity:.55}
+.timeline-sidebar-fixed .lane-rename{
+  border:1px solid #6266ed;border-radius:4px;background:#15161d;color:white;
+  outline:0;font-size:12px;padding:4px 5px;width:100%;min-width:45px
+}
+.timeline-sidebar-fixed .track-label .track-mute{flex:0 0 24px;width:24px}
+.timeline-sidebar-fixed .track-remove{font-size:15px;color:#cacbd1;border:0;background:transparent}
+.timeline-time-canvas>.audio-lane{
+  overflow:hidden;background:#0d0f12!important;
+}
+.timeline-time-canvas>.audio-lane .audio-clip-region{
+  position:absolute;top:0;height:100%;border-radius:4px;overflow:hidden;
+  background:#074964;
+}
+.timeline-time-canvas>.audio-lane.clean .audio-clip-region{background:#345d22}
+.timeline-time-canvas>.audio-lane.import .audio-clip-region{background:#543471}
+.timeline-time-canvas>.audio-lane.original .audio-clip-region{background:#074964}
+.timeline-time-canvas>.audio-lane .audio-clip-region.clip-locked{cursor:default}
+.timeline-time-canvas>.audio-lane .audio-clip-region.clip-blade{cursor:crosshair}
+.timeline-time-canvas>.audio-lane .audio-clip-region.selected-clip{
+  outline:1px solid #a7aafa;outline-offset:-1px;z-index:3
+}
+.clip-delete{
+  position:absolute;right:4px;bottom:4px;z-index:7;
+  width:21px;height:21px;border-radius:4px;
+  background:#391f2b;color:#ffd7df;border:1px solid #8d5360;
+  cursor:pointer;font-size:16px;line-height:17px;
+}
+.clip-delete:hover{background:#713344}
+.clip-fade-curve{
+  position:absolute;height:100%;top:0;pointer-events:none;
+  overflow:visible;z-index:2;
+}
+.clip-fade-curve.in{left:0}
+.clip-fade-curve.out{right:0}
+.clip-fade-curve path{stroke:#d9e6ff;stroke-width:3;fill:none;vector-effect:non-scaling-stroke;opacity:.85}
+.clip-fade-handle{
+  position:absolute;top:1px;z-index:5;
+  width:12px;height:12px;transform:translateX(-50%);
+  background:#e4ebff;border:2px solid #4f5599;border-radius:3px;
+  cursor:ew-resize;touch-action:none;
+  box-shadow:0 1px 3px #0008;
+}
+.clip-fade-handle.fade-out{background:#a6f3cb}
+.clip-fade-handle:hover{border-color:white}
+.clip-volume-line{
+  position:absolute;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,rgba(215,234,255,.6),rgba(215,234,255,.85));
+  border-top:1px solid #dceeff;transform:translateY(-50%);
+  cursor:ns-resize;touch-action:none;z-index:4;
+}
+.clip-volume-line:hover{height:6px;background:#d9e1ff}
+@media(max-width:1000px){
+ .timeline-edit-tools button{padding-inline:6px}
+}
+
+.timeline-edit-tools button{white-space:nowrap;flex-shrink:0}

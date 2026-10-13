@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -57,52 +58,94 @@ class AudioStream:
         return " · ".join(bits)
 
 
-def _run(cmd, log: Callable[[str], None], cancel_event: threading.Event | None = None):
+def _run(cmd, log: Callable[[str], None], cancel_event: threading.Event | None = None, *, env=None):
+    """Stream subprocess logs while cancellation can interrupt a blocked readline.
+
+    On Windows the entire process tree is stopped (model runner may have
+    spawned children); POSIX subprocesses use their own process group.
+    """
+    import signal
     log("> " + " ".join(map(str, cmd)))
     creationflags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+    environment = dict(os.environ if env is None else env)
+    environment["PYTHONIOENCODING"] = "utf-8"
+    environment["PYTHONUTF8"] = "1"
+    environment["PYTHONUNBUFFERED"] = "1"
     proc = subprocess.Popen(
         list(map(str, cmd)),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
+        text=True, encoding="utf-8", errors="replace",
         creationflags=creationflags,
+        start_new_session=(os.name != "nt"),
+        env=environment,
+        bufsize=1,
     )
+
+    stopped = threading.Event()
+    def stop_process():
+        if proc.poll() is not None:
+            return
+        if os.name == "nt":
+            try:
+                subprocess.run(
+                    ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    timeout=8, creationflags=subprocess.CREATE_NO_WINDOW,
+                )
+            except (OSError, subprocess.TimeoutExpired):
+                proc.kill()
+        else:
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            except OSError:
+                proc.terminate()
+
+    def cancel_watcher():
+        if cancel_event is None:
+            return
+        while not stopped.is_set():
+            if cancel_event.wait(.15):
+                stop_process()
+                return
+    watcher = threading.Thread(target=cancel_watcher, daemon=True)
+    watcher.start()
 
     lines = []
     assert proc.stdout is not None
-    while True:
+    try:
+        for line in proc.stdout:
+            clean_line = line.rstrip()
+            if clean_line:
+                lines.append(clean_line)
+                if len(lines) > 200:
+                    lines = lines[-200:]
+                log(clean_line)
+            if cancel_event and cancel_event.is_set():
+                break
         if cancel_event and cancel_event.is_set():
-            proc.terminate()
-            try:
-                proc.wait(timeout=3)
-            except Exception:
-                proc.kill()
+            stop_process()
             raise Cancelled("Операция отменена.")
-
-        line = proc.stdout.readline()
-        if line:
-            line = line.rstrip()
-            lines.append(line)
-            log(line)
-
-        if proc.poll() is not None:
-            rest = proc.stdout.read()
-            if rest:
-                for line in rest.splitlines():
-                    lines.append(line)
-                    log(line)
-            break
-
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"Команда завершилась с кодом {proc.returncode}.\n"
-            + "\n".join(lines[-20:])
-        )
-
-    return "\n".join(lines)
-
+        code = proc.wait()
+        if code:
+            marker = "ACL_DOWNLOAD_FAILED:"
+            download_error = next(
+                (line.split(marker, 1)[1].strip()
+                 for line in reversed(lines) if marker in line), None
+            )
+            if download_error:
+                raise RuntimeError(download_error)
+            raise RuntimeError(
+                f"Команда завершилась с кодом {code}.\\n" + "\\n".join(lines[-20:])
+            )
+        return "\\n".join(lines)
+    finally:
+        stopped.set()
+        if proc.poll() is None:
+            stop_process()
+        proc.stdout.close()
 
 def probe(path: Path) -> dict:
     cmd = [
@@ -223,10 +266,18 @@ def prepare_audio(
     sample_rate: int,
     log,
     cancel_event,
+    range_start_ms: int | None = None,
+    range_end_ms: int | None = None,
 ):
     cmd = [
-        ffmpeg_path(), "-hide_banner", "-y",
+        ffmpeg_path(), "-nostdin", "-hide_banner", "-y",
         "-i", str(source),
+    ]
+    if range_start_ms is not None and range_end_ms is not None:
+        # Output-side trim for sample-accurate cuts, independent of video keyframes.
+        cmd += ["-ss", f"{range_start_ms/1000:.3f}",
+                "-t", f"{(range_end_ms-range_start_ms)/1000:.3f}"]
+    cmd += [
         "-map", f"0:{stream_index}",
         "-vn", "-sn", "-dn",
         "-ac", "2",
@@ -247,6 +298,54 @@ def separator_exe() -> Path:
     raise FileNotFoundError("audio-separator executable не найден в .venv.")
 
 
+def preset_model_names(preset: str) -> list[str]:
+    """Read the actual model list shipped with the installed audio-separator."""
+    try:
+        from importlib import resources
+        preset_file = resources.files("audio_separator").joinpath("ensemble_presets.json")
+        with preset_file.open("r", encoding="utf-8") as handle:
+            models = json.load(handle).get("presets", {}).get(preset, {}).get("models", [])
+        return [name for name in models if isinstance(name, str)]
+    except (ImportError, OSError, ValueError, TypeError, KeyError):
+        return []
+
+
+def resolve_model_cache_dir(settings: dict, log) -> Path:
+    """Prefer an existing complete preset cache over an empty configured path.
+
+    Preserve the user's configured cache whenever it already has the models.
+    Do not modify settings.json or copy multi-gigabyte model files.
+    """
+    configured = Path(settings.get("model_cache_dir") or (APP_ROOT / "models")).expanduser()
+    bundled = APP_ROOT / "models"
+    required = preset_model_names(settings.get("separator_preset", "instrumental_full"))
+
+    def available(folder: Path) -> int:
+        return sum(
+            (folder / filename).is_file()
+            and (folder / filename).stat().st_size > 1024 * 1024
+            for filename in required
+        )
+
+    selected = configured
+    if required and configured.resolve() != bundled.resolve():
+        configured_count = available(configured)
+        bundled_count = available(bundled)
+        if bundled_count > configured_count:
+            selected = bundled
+            log(
+                f"Кеш {configured}: {configured_count}/{len(required)} моделей; "
+                f"кеш проекта {bundled}: {bundled_count}/{len(required)}. "
+                "Использую более полный локальный кеш."
+            )
+
+    selected.mkdir(parents=True, exist_ok=True)
+    log(f"Папка моделей: {selected}")
+    if required:
+        log(f"Модели пресета: {available(selected)}/{len(required)} уже в кеше.")
+    return selected
+
+
 def run_separator(
     prepared: Path,
     out_dir: Path,
@@ -254,11 +353,11 @@ def run_separator(
     log,
     cancel_event,
 ) -> Path:
-    model_dir = Path(settings.get("model_cache_dir") or (APP_ROOT / "models"))
-    model_dir.mkdir(parents=True, exist_ok=True)
+    model_dir = resolve_model_cache_dir(settings, log)
 
     cmd = [
-        separator_exe(),
+        os.sys.executable,
+        str(APP_ROOT / "separator_runner.py"),
         str(prepared),
         "--ensemble_preset", settings["separator_preset"],
         "--single_stem", "Instrumental",
@@ -286,7 +385,24 @@ def run_separator(
     if settings.get("torch_compile"):
         cmd.append("--use_torch_compile")
 
-    _run(cmd, log, cancel_event)
+    environment = os.environ.copy()
+    environment["AUDIO_SEPARATOR_MODEL_DIR"] = str(model_dir)
+    try:
+        _run(cmd, log, cancel_event, env=environment)
+    except RuntimeError as exc:
+        details = str(exc)
+        if "Не удалось загрузить файл модели" in details:
+            raise
+        if any(token in details for token in (
+            "ConnectionResetError", "Connection aborted", "ReadTimeout",
+            "ConnectTimeout", "RemoteDisconnected", "Max retries exceeded",
+        )):
+            raise RuntimeError(
+                "Не удалось загрузить модель: сетевое соединение было разорвано. "
+                f"Проверьте доступ к GitHub или используйте уже скачанные модели в {model_dir}. "
+                "После восстановления соединения повторите обработку."
+            ) from exc
+        raise
 
     candidates = [
         out_dir / "separated_raw.wav",
@@ -383,11 +499,37 @@ def loudnorm_measure(source: Path, filters: list[str], settings: dict, log, canc
     ]
     output = _run(cmd, log, cancel_event)
 
-    matches = re.findall(r"\{\s*\"input_i\".*?\}", output, re.DOTALL)
-    if not matches:
-        raise RuntimeError("Не удалось получить статистику loudnorm.")
-    return json.loads(matches[-1])
+    # FFmpeg usually prints one JSON object at the end of the log, but
+    # different builds may reorder fields or include additional diagnostics.
+    required = ("input_i", "input_lra", "input_tp", "input_thresh", "target_offset")
+    stats = None
+    for found in re.finditer(r"\\{[^{}]*\\}", output, re.DOTALL):
+        try:
+            candidate = json.loads(found.group())
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict) and all(k in candidate for k in required):
+            stats = candidate
 
+    if stats is None:
+        log("Предупреждение: FFmpeg не выдал полную статистику loudnorm. "
+            "Перехожу на однопроходную нормализацию.")
+        if output.strip():
+            log("Диагностика loudnorm: " + output.strip()[-1500:])
+        return None
+
+    # Silence and very short segments can produce -inf/inf or nan LUFS.
+    # These cannot be used as measured_... in a second pass.
+    try:
+        finite = all(math.isfinite(float(stats[key])) for key in required)
+    except (ValueError, TypeError, OverflowError):
+        finite = False
+    if not finite:
+        log("Предупреждение: измеренная громкость не определена "
+            "(тишина или слишком короткий фрагмент). "
+            "Перехожу на однопроходную нормализацию.")
+        return None
+    return stats
 
 def output_codec(bit_depth: str) -> str:
     return {
@@ -409,25 +551,31 @@ def master_audio(
     if settings.get("loudnorm_enabled"):
         log("Первый проход EBU R128...")
         stats = loudnorm_measure(source, filters, settings, log, cancel_event)
-        log(
-            f"Громкость до: {stats.get('input_i')} LUFS; "
-            f"True Peak: {stats.get('input_tp')} dBTP; "
-            f"LRA: {stats.get('input_lra')} LU"
-        )
-
         ln = (
             "loudnorm="
             f"I={float(settings['target_lufs'])}:"
             f"LRA={float(settings['target_lra'])}:"
-            f"TP={float(settings['true_peak_db'])}:"
-            f"measured_I={stats['input_i']}:"
-            f"measured_LRA={stats['input_lra']}:"
-            f"measured_TP={stats['input_tp']}:"
-            f"measured_thresh={stats['input_thresh']}:"
-            f"offset={stats['target_offset']}:"
-            "linear=true:print_format=summary"
+            f"TP={float(settings['true_peak_db'])}"
         )
-        filters.append(ln)
+        if stats is not None:
+            log(
+                f"Громкость до: {stats['input_i']} LUFS; "
+                f"True Peak: {stats['input_tp']} dBTP; "
+                f"LRA: {stats['input_lra']} LU"
+            )
+            ln += (
+                f":measured_I={stats['input_i']}"
+                f":measured_LRA={stats['input_lra']}"
+                f":measured_TP={stats['input_tp']}"
+                f":measured_thresh={stats['input_thresh']}"
+                f":offset={stats['target_offset']}"
+                ":linear=true"
+            )
+        else:
+            # Keep the output audible and avoid a failed render when a valid
+            # measurement is impossible, e.g. a silent source.
+            log("Второй проход недоступен; применяю обычный loudnorm.")
+        filters.append(ln + ":print_format=summary")
 
     out_sr = int(settings["output_sample_rate"])
     filters.append(f"aresample={out_sr}")
@@ -456,6 +604,8 @@ def process_one(
     log: Callable[[str], None],
     phase: Callable[[str, int], None],
     cancel_event: threading.Event,
+    range_start_ms: int | None = None,
+    range_end_ms: int | None = None,
 ):
     source = Path(source)
     output = Path(output)
@@ -476,6 +626,8 @@ def process_one(
             int(settings["separator_sample_rate"]),
             log,
             cancel_event,
+            range_start_ms=range_start_ms,
+            range_end_ms=range_end_ms,
         )
 
         if cancel_event.is_set():
@@ -502,7 +654,23 @@ def process_one(
             raise Cancelled()
 
         output.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(mastered, output)
+        # A failed/cancelled file copy must never expose a partial WAV as a
+        # completed audio track. Stage on the same volume, then atomic rename.
+        staged = output.with_name(f".{output.name}.{uuid.uuid4().hex}.part")
+        try:
+            with mastered.open("rb") as source_handle, staged.open("wb") as output_handle:
+                while True:
+                    if cancel_event.is_set():
+                        raise Cancelled("Отменено во время сохранения WAV.")
+                    block = source_handle.read(1024 * 1024)
+                    if not block:
+                        break
+                    output_handle.write(block)
+            if cancel_event.is_set():
+                raise Cancelled("Отменено перед сохранением WAV.")
+            os.replace(staged, output)
+        finally:
+            staged.unlink(missing_ok=True)
 
         if settings.get("keep_prepared_audio"):
             shutil.copy2(prepared, output.with_name(output.stem + "_Prepared.wav"))

@@ -1,0 +1,119 @@
+{
+  "name": "anime-audio-cleaner",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "description": "Cross-platform native shell for Anime Audio Cleaner",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "predev": "node scripts/sync-icons.cjs",
+    "dev": "concurrently -k \"vite --host 127.0.0.1 --port 5173\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "prebuild": "node scripts/sync-icons.cjs",
+    "build": "tsc --noEmit && vite build",
+    "test:editor": "node scripts/test-editor.cjs",
+    "test:snapping": "node scripts/test-snapping.cjs",
+    "test:clips": "node scripts/test-clip-editing.cjs",
+    "test:shortcuts": "node scripts/test-shortcuts.cjs",
+    "test:waveform": "node scripts/test-waveform.cjs",
+    "test:history": "node scripts/test-history.cjs",
+    "test:envelope": "node scripts/test-envelope-transport.cjs",
+    "test:timeline-scroll": "node scripts/test-timeline-scroll.cjs",
+    "test:fx-clips": "node scripts/test-fx-clips.cjs",
+    "test:project": "node scripts/test-project.cjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "start": "electron .",
+    "package": "npm run build && electron-builder --config electron-builder.config.cjs",
+    "package:win": "npm run build && electron-builder --config electron-builder.config.cjs --win nsis --publish never",
+    "package:mac": "npm run build && electron-builder --config electron-builder.config.cjs --mac dmg zip --publish never",
+    "package:linux": "npm run build && electron-builder --config electron-builder.config.cjs --linux AppImage deb --publish never",
+    "test:standalone": "node scripts/test-standalone-setup.cjs"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.1.0",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.2.0",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "ru.aniu.acl",
+    "productName": "Anime Audio Cleaner",
+    "directories": {
+      "output": "../dist-installers"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend"
+      },
+      {
+        "from": "../common.py",
+        "to": "common.py"
+      },
+      {
+        "from": "../processor.py",
+        "to": "processor.py"
+      },
+      {
+        "from": "../separator_runner.py",
+        "to": "separator_runner.py"
+      },
+      {
+        "from": "../bootstrap.py",
+        "to": "bootstrap.py"
+      },
+      {
+        "from": "../tools/ffmpeg/bin/ffmpeg.exe",
+        "to": "tools/ffmpeg/bin/ffmpeg.exe"
+      },
+      {
+        "from": "../tools/ffmpeg/bin/ffprobe.exe",
+        "to": "tools/ffmpeg/bin/ffprobe.exe"
+      },
+      {
+        "from": "../tools/ffmpeg/LICENSE",
+        "to": "licenses/FFmpeg-LICENSE.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "${productName}-${version}-${arch}-${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.music"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "AudioVideo"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

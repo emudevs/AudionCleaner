@@ -1,0 +1,195 @@
+/* Main application menu and frameless Electron titlebar. */
+.acl-app-header{
+  -webkit-app-region:drag;
+  position:relative;
+  z-index:1100;
+  flex:0 0 52px;
+  height:52px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 0 0 15px;
+  background:#0b0c0e;
+  border-bottom:1px solid #1a1b20;
+  user-select:none;
+  overflow:visible;
+}
+.acl-app-header button,.acl-app-header nav,
+.acl-app-header .acl-header-dropdown,.acl-app-header .acl-header-menu{
+  -webkit-app-region:no-drag;
+}
+.acl-header-left,.acl-header-right{
+  display:flex;align-items:center;flex:0 0 auto;min-width:0;
+}
+.acl-header-left{gap:10px}
+.acl-header-back{
+  width:28px;height:28px;min-width:28px;
+  display:grid;place-items:center;
+  border:0;border-radius:9px;
+  padding:0;background:#17191e;
+}
+.acl-header-back img{width:11px;height:11px}
+.acl-header-back:hover{background:#252731}
+.acl-header-menu-bar{display:flex;align-items:center;gap:4px}
+.acl-header-menu{position:relative}
+.acl-header-menu-trigger{
+  height:36px;min-width:0;padding:0 10px;
+  background:transparent;color:#e2e2e5;
+  border:0;border-radius:6px;
+  font-size:15px;font-weight:450;
+}
+.acl-header-menu-trigger:hover,.acl-header-menu-trigger.is-open{
+  background:#1c1e24;color:#fff;
+}
+.acl-header-dropdown{
+  position:absolute;left:0;top:calc(100% + 5px);
+  z-index:3000;
+  width:max-content;min-width:245px;max-width:320px;
+  max-height:calc(100vh - 76px);overflow-y:auto;
+  background:#18191f;border:1px solid #363841;
+  border-radius:10px;padding:6px;
+  box-shadow:0 14px 48px #000b;
+  display:flex;flex-direction:column;
+  scrollbar-width:thin;scrollbar-color:#41434f transparent;
+}
+.acl-header-dropdown button{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;padding:9px 11px;min-height:35px;
+  color:#e5e5eb;background:transparent;
+  border:0;border-radius:6px;font-size:12px;
+  text-align:left;white-space:nowrap;
+}
+.acl-header-dropdown button:hover:not(:disabled),
+.acl-header-dropdown button:focus-visible{
+  background:#2b2c39;
+}
+.acl-header-dropdown button:disabled{opacity:.35}
+.acl-header-dropdown kbd{flex:0 0 auto;color:#9297a6;font:11px/1 "Segoe UI",sans-serif}
+.acl-menu-separator{height:1px;margin:5px 6px;background:#34353d}
+.acl-header-right{gap:9px;min-width:0;margin-left:auto}
+.acl-app-header .acl-header-action{
+  flex:0 0 auto;
+  min-height:35px;height:35px;
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;padding:0 13px;
+  border:0;border-radius:9px;
+  font-size:14px;font-weight:500;white-space:nowrap;
+  background:#1b1c20;color:#e6e6ec;
+}
+.acl-app-header .acl-header-action img{width:17px;height:17px;flex:0 0 auto}
+.acl-app-header .acl-header-action:hover:not(:disabled){background:#2b2d35}
+.acl-app-header .acl-header-subtitles{
+  background:#121316;color:#85868b;opacity:.7;
+}
+.acl-app-header .acl-header-subtitles:disabled{opacity:.62}
+.acl-app-header .acl-header-subtitles img.acl-header-new{
+  width:28px;height:17px;opacity:1;
+}
+.acl-app-header .acl-header-process{
+  background:#6065ef;color:white;font-weight:560;padding:0 15px;
+}
+.acl-app-header .acl-header-process:hover:not(:disabled){background:#757afd}
+.acl-app-header .acl-header-process:disabled{opacity:.5}
+.acl-window-actions{
+  -webkit-app-region:no-drag;
+  height:52px;display:flex;align-items:stretch;
+  margin-left:7px;
+}
+.acl-window-actions button{
+  flex:0 0 44px;width:44px;height:52px;
+  display:grid;place-items:center;
+  padding:0;border:0;border-radius:0;
+  background:transparent;color:#d8d9df;
+}
+.acl-window-actions button:hover{background:#292a30}
+.acl-window-actions button.acl-window-close:hover{background:#b72b3a}
+.acl-window-minimize{width:14px;height:1.5px;background:currentColor;margin-top:10px}
+.acl-window-maximize{
+  position:relative;
+  width:13px;height:11px;border:1.5px solid currentColor;border-radius:1px;
+}
+.acl-window-maximize.is-restored:before{
+  content:"";position:absolute;top:-5px;right:-5px;
+  width:11px;height:9px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;
+}
+.acl-window-maximize.is-restored{transform:translate(-2px,2px)}
+.acl-window-cross{position:relative;width:15px;height:15px}
+.acl-window-cross:before,.acl-window-cross:after{
+  content:"";position:absolute;left:7px;top:-2px;width:1.5px;height:19px;
+  background:currentColor;
+}
+.acl-window-cross:before{transform:rotate(45deg)}
+.acl-window-cross:after{transform:rotate(-45deg)}
+.acl-help-shade{
+  position:fixed;z-index:4000;inset:0;
+  display:grid;place-items:center;
+  background:#000b;
+}
+.acl-help-dialog{
+  min-width:340px;max-width:min(520px,calc(100vw - 32px));
+  padding:21px 24px;border-radius:12px;background:#191a1f;
+  border:1px solid #414251;box-shadow:0 20px 70px #000a;
+}
+.acl-help-dialog h2{margin:0 0 14px;font-size:17px}
+.acl-help-dialog p{margin:7px 0;color:#c7c7d0;line-height:1.6}
+.acl-help-keys{display:grid;grid-template-columns:1fr auto;gap:9px 25px}
+.acl-help-keys kbd{color:#b0b3f5;font-family:inherit}
+.acl-help-dialog>button{float:right;margin-top:17px}
+@media(max-width:1280px){
+  .acl-app-header{gap:6px;padding-left:8px}
+  .acl-header-left{gap:5px}
+  .acl-header-menu-bar{gap:0}
+  .acl-header-menu-trigger{font-size:13px;padding:0 8px}
+  .acl-header-right{gap:5px}
+  .acl-app-header .acl-header-action{font-size:12px;padding:0 10px;gap:5px}
+  .acl-window-actions{margin-left:0}
+  .acl-window-actions button{width:38px;flex-basis:38px}
+}
+@media(max-width:1060px){
+  .acl-app-header .acl-header-subtitles{display:none}
+  .acl-header-menu-trigger{padding-inline:6px}
+}
+
+/* Compact header: match the 40px editor chrome without shrinking menu hit targets. */
+.acl-app-header{
+  flex:0 0 40px;
+  height:40px;
+  gap:8px;
+  padding-left:11px;
+}
+.acl-header-left{gap:7px}
+.acl-header-back{
+  width:24px;height:24px;min-width:24px;border-radius:7px;
+}
+.acl-header-back img{width:10px;height:10px}
+.acl-header-menu-bar{gap:2px}
+.acl-header-menu-trigger{
+  height:30px;padding:0 8px;font-size:13px;
+}
+.acl-header-right{gap:6px}
+.acl-app-header .acl-header-action{
+  min-height:30px;height:30px;
+  gap:6px;padding:0 11px;
+  border-radius:7px;font-size:12px;
+}
+.acl-app-header .acl-header-action img{width:15px;height:15px}
+.acl-app-header .acl-header-subtitles img.acl-header-new{
+  width:26px;height:16px;
+}
+.acl-app-header .acl-header-process{padding:0 12px}
+.acl-window-actions{height:40px;margin-left:4px}
+.acl-window-actions button{
+  flex:0 0 40px;width:40px;height:40px;
+}
+.acl-header-dropdown{max-height:calc(100vh - 62px)}
+@media(max-width:1280px){
+  .acl-app-header{padding-left:8px}
+  .acl-header-menu-trigger{font-size:12px;padding:0 6px}
+  .acl-window-actions button{flex-basis:36px;width:36px}
+}
+
+/* Windows Window Controls Overlay occupies the right caption area.
+   Do not paint clickable React controls under the native caption buttons. */
+.acl-app-header.acl-native-caption{padding-right:138px}

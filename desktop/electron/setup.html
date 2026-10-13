@@ -1,0 +1,48 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Подготовка Anime Audio Cleaner</title>
+<style>
+:root{color-scheme:dark;font:14px/1.5 "Segoe UI",Arial,sans-serif;background:#101116;color:#e7e7ec}
+*{box-sizing:border-box}body{margin:0;padding:36px 42px;overflow:hidden}
+.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:12px;
+background:#282b67;color:#9296ff;font-size:27px;margin-bottom:22px}
+h1{font-size:22px;margin:0 0 8px}p{color:#a2a6b5;font-size:13px;margin:0 0 20px}
+.bar{height:5px;background:#272932;border-radius:8px;overflow:hidden;margin:14px 0 22px}
+.bar:after{content:"";display:block;width:35%;height:100%;background:#6267f5;border-radius:8px;animation:sweep 1.6s ease-in-out infinite alternate}
+@keyframes sweep{from{transform:translateX(-90%)}to{transform:translateX(300%)}}
+.status{min-height:19px;color:#cfd0ef;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.log{height:122px;overflow:auto;background:#090a0d;border:1px solid #2b2d37;
+padding:12px;font:11px/1.6 Consolas,monospace;color:#8f95ac;
+border-radius:8px;margin-top:13px;white-space:pre-wrap;word-break:break-all;scrollbar-width:thin}
+.actions{display:flex;align-items:center;justify-content:space-between;margin-top:17px;gap:12px}
+.note{font-size:11px;color:#7f8394}button{border:0;border-radius:7px;background:#6368f5;
+color:white;padding:9px 17px;cursor:pointer;font:12px "Segoe UI";display:none}
+button:hover{background:#767bff}
+.error .bar:after{background:#e26073;animation:none;transform:none;width:100%}
+.error #retry{display:block}.error .status{color:#ff9da8}
+</style></head><body><div class="logo">♪</div>
+<h1>Подготовка Anime Audio Cleaner</h1>
+<p>Программа автоматически установит необходимые компоненты. Это требуется только при первом запуске.</p>
+<div class="bar"></div><div class="status" id="status">Проверяю окружение…</div>
+<div class="log" id="log" aria-live="polite"></div>
+<div class="actions"><span class="note">Не закрывайте программу во время установки.</span>
+<button type="button" id="retry">Повторить попытку</button></div>
+<script>
+const log=document.getElementById('log'), status=document.getElementById('status');
+window.aclSetup.onProgress(message=>{
+ status.textContent=message;
+ log.textContent+=(log.textContent?'\n':'')+message;
+ if(log.textContent.length>12500)log.textContent=log.textContent.slice(-12000);
+ log.scrollTop=log.scrollHeight;
+});
+window.aclSetup.onFailure(message=>{
+ document.body.classList.add('error');
+ status.textContent='Не удалось завершить установку';
+ log.textContent+='\nОшибка: '+message;
+ log.scrollTop=log.scrollHeight;
+});
+document.getElementById('retry').onclick=()=>{
+ document.body.classList.remove('error');document.getElementById('retry').style.display='none';
+ status.textContent='Повторяю подготовку…';window.aclSetup.retry();
+};
+</script></body></html>

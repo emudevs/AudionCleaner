@@ -1,69 +1,108 @@
-# Anime Audio Cleaner
+# Anime Audio Cleaner (ACL)
 
-Remove dialogue and vocals from anime, films, and audio files while preserving background music and effects. Processing runs locally and exports a stereo `*_Clear.wav` for editing. Standalone Windows app with a Premiere-inspired interface; GUI labels are in Russian.
+**Открытые исходники Windows-редактора аудиодорожек с нейросетевой обработкой.**
 
-![Anime Audio Cleaner](GUI.png)
+В этом репозитории находятся интерфейс React/Electron, Python-бэкенд,
+обработка FFmpeg, сценарии автоматической подготовки и тесты.
 
-## Installation
+## Запуск из исходников: один файл
 
-1. Install **Python 3.12 x64** and enable **Add Python to PATH**.
-2. Download this repository using **Code → Download ZIP**, then extract it into a writable folder.
-3. Run **`start.bat`** and wait for setup. On first launch, it downloads and verifies **FFmpeg + FFprobe**, creates the Python environment, and installs the AI dependencies. No manual FFmpeg installation or system PATH changes are needed on Windows.
-4. Import a video/audio file and select an audio track if prompted. **Auto-start is enabled by default**; disable it before importing if you want to adjust settings first.
-5. Find the resulting WAV beside your source, or choose another output location.
+На **Windows 10/11 x64** дважды нажмите **`START-ACL.cmd`**.
 
-An internet connection is required for setup and model downloads. Models are cached for later runs. If installation fails, check the console message and rerun `start.bat`. Use `repair.bat` to reinstall dependencies and the local FFmpeg tools.
+Сценарий `scripts/Setup-ACL.ps1` автоматически:
 
-## Profiles
+1. Проверит Node.js 22+; если его нет, распакует локальную копию в `.runtime/node`.
+2. Загрузит Python 3.12 в `.runtime/python` без прав администратора.
+3. Установит FFmpeg/FFprobe в `tools/ffmpeg`.
+4. Подготовит `.venv`, PyTorch, `audio-separator` и другие Python-зависимости.
+5. Загрузит модели стандартного пресета в `models/`.
+6. Выполнит `npm ci` и запустит Electron-приложение.
 
-### Voice separation
+Всё происходит автоматически. При следующем запуске установленные компоненты
+используются повторно. Первичная загрузка требует **интернет и несколько
+гигабайт свободного места**. NVIDIA GPU используется при доступности
+совместимого CUDA/PyTorch; при отсутствии GPU предусмотрен CPU-режим.
 
-| Preset | Purpose |
-| --- | --- |
-| `instrumental_full` | Default: prioritize preservation of music and sound effects. |
-| `instrumental_balanced` | Balance background preservation and voice removal. |
-| `instrumental_clean` | More aggressive voice removal; higher risk of artifacts. |
-| `instrumental_low_resource` | Lower-resource alternative with a quality tradeoff. |
-| `karaoke` | Lead singing vocals rather than dialogue. |
-| `vocal_*` | Alternative vocal-oriented ensembles; the app exports their instrumental stem. |
+## Создание Windows-установщика
 
-### Post-processing
+Дважды нажмите **`BUILD-INSTALLER.cmd`**.
 
-| Profile | Purpose |
-| --- | --- |
-| `off` | No cleanup effects; output format conversion still applies. |
-| `safe` | Default: 20 Hz high-pass, automatic denoising, and loudness normalization. |
-| `restoration` | Cleanup with a quiet blend of original high frequencies; may bring back voice remnants. |
-| `custom` | Adjust individual effects manually. |
+Скрипт самостоятельно подготовит Node.js, Python и FFmpeg, поставит npm-зависимости,
+проверит TypeScript и запустит `electron-builder`. Создаётся **NSIS-установщик**
+в каталоге `dist-installers/`.
 
-Default export: **48 kHz / 24-bit PCM WAV**, with a **-18 LUFS** target in the safe profile. Separation is imperfect: some voices may remain and some effects may be affected.
+Установщик содержит приложение, Python-исходники и FFmpeg. При **первом запуске
+установленного приложения** встроенный мастер подготовки самостоятельно загрузит
+Python, необходимые библиотеки и модели в профиль пользователя. В системный
+Python, npm или переменные окружения Windows вносить изменения не требуется.
+После завершения подготовки редактор запускается автоматически.
 
-## Dependencies
+**Важно:** установщик не обязан работать без сети при самом первом запуске.
+После установки компонентов и стандартных моделей редактор способен запускаться
+локально. Дополнительные нейросетевые пресеты могут потребовать отдельных загрузок.
 
-- **Required beforehand:** Windows x64, Python 3.12 with Tkinter, internet for setup.
-- **Installed automatically:** FFmpeg/FFprobe, PyTorch, `audio-separator 0.47.0`, ONNX Runtime, NumPy, SoundFile, Librosa, Audioread, and TkinterDnD2.
-- **GPU acceleration:** optional NVIDIA GPU and a driver compatible with the CUDA 13.0 PyTorch build. Otherwise setup uses the CPU dependency path.
-- Leave space for dependencies, model weights, temporary WAV files, and exports. Storage needs vary by model and episode length.
+## Состав репозитория
 
-### macOS (experimental)
+- `desktop/src/`: интерфейс React и CSS.
+- `desktop/electron/`: Electron, безопасный IPC, установка при первом запуске.
+- `desktop/public/` и `Icons/`: интерфейсные SVG.
+- `backend/`: Python JSON-lines API и медиапайплайн.
+- `processor.py` / `separator_runner.py`: ядро обработки и разделения.
+- `bootstrap.py` / `common.py`: установка зависимостей, конфигурация и пути.
+- `scripts/Setup-ACL.ps1`: автоматический установщик для исходников и сборки.
+- `tests/` и `desktop/scripts/test-*.cjs`: автоматические тесты.
 
-Install **Python 3.12 with Tkinter** from python.org and **Homebrew** from brew.sh, then extract the project and open `start.command`. Missing FFmpeg/FFprobe are installed through Homebrew automatically. `repair.command` rebuilds the Python environment while keeping settings and cached models. Close the app before running repair.
+В Git **намеренно не хранятся** Python-окружение, сборочные артефакты,
+`node_modules`, веса моделей, FFmpeg и личные настройки. Эти ресурсы
+появляются автоматически после запуска скриптов.
 
-If the ZIP download lost executable permissions, run `chmod +x start.command repair.command` in the project folder. These scripts have not been tested on a Mac; macOS uses the CPU dependency path.
+## Запуск проверок
 
-## Tested configuration
+Из папки `desktop` после установки Node/npm:
 
-**Windows 11 · RTX 4070 12 GB · 32 GB RAM · NVIDIA driver 616.92**
+```powershell
+npm run build
+npm run test:shortcuts
+npm run test:clips
+npm run test:waveform
+npm run test:project
+npm run test:standalone
+```
 
-A **23 min 40 sec** episode processed in **8 min 53 sec** using `instrumental_clean`, FP32, and safe post-processing:
+Проверка Python (после запуска `START-ACL.cmd`):
 
-- Peak total GPU memory: **6.31 GiB**, including background applications; **2.45 GiB** was already occupied before processing.
-- Peak combined process RAM (RSS): **4.92 GiB**.
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py"
+```
 
-These measurements are not verified minimum requirements. RTX 3050 and lower-memory systems have not been tested. CPU processing is supported but has not been benchmarked here.
+## Перед публичным распространением
 
----
+Исполняемые файлы и нейросетевые модели подчиняются лицензиям своих авторов.
+Перед публикацией установщика проверьте лицензии FFmpeg, PyTorch,
+`audio-separator` и загружаемых моделей, а также необходимость подписи
+Windows-приложения. Автоматическая сборка пока не означает, что все GPU,
+кодеки и аудиоэффекты проверены на чистой системе.
 
-If this project helps you, please give it a **⭐ on GitHub**!
+## Автоматическая сборка на GitHub (все три ОС)
 
-**Demo and discussion on Telegram:** [t.me/unpecador/20](https://t.me/unpecador/20)
+В ветке `ACL-GUI` есть workflow `.github/workflows/build.yml`. Он запускается
+после каждого push в ветку, при Pull Request, вручную через **Actions → ACL GUI
+• Windows / macOS / Linux → Run workflow**, а также при пуше тега `v*`.
+
+GitHub создаёт три независимые сборки на настоящих runner-ах соответствующей ОС:
+
+| Runner | Архивы/установщики | Статус |
+| --- | --- | --- |
+| Windows x64 | NSIS `.exe` | Первый запуск автоматически устанавливает Python/модели |
+| macOS (Intel и Apple Silicon) | `.dmg` и `.zip` | Экспериментальный UI-пакет, автономная установка Python ещё не реализована |
+| Linux x64 | `.AppImage` и `.deb` | Экспериментальный UI-пакет, автономная установка Python ещё не реализована |
+
+Артефакты доступны на странице каждого запуска в разделе **Artifacts** в течение
+30 дней. Теги `v*` также создают предварительный **GitHub Release** с файлами
+сборок (если все три сборки успешно завершились).
+
+**Важное ограничение:** сборка установщика ≠ полная работоспособность на ОС.
+Для macOS/Linux пока нет автономного подготовщика Python-моделей, а ресурсы FFmpeg
+сейчас включены только в Windows-пакет. Для этих платформ ещё потребуется
+разработка и интеграционные тесты. DMG/ZIP на macOS собираются без подписи
+Apple Developer ID, поэтому macOS Gatekeeper может блокировать их запуск.

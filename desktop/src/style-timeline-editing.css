@@ -1,0 +1,180 @@
+/* Native-looking editing affordances: trim, fade, selection and context menu. */
+.timeline-toolbar{position:relative;justify-content:flex-start}
+.timeline-toolbar .timeline-zoom-actions{order:1;flex:0 0 auto}
+.timeline-toolbar .timeline-toolbar-scale{order:0}
+.timeline-toolbar .timeline-edit-tools{
+ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+ order:3;z-index:3;
+}
+.timeline-toolbar .timeline-clip-offset,.timeline-toolbar .timeline-range-actions{
+ order:4;margin-left:auto
+}
+@media(max-width:900px){
+ .timeline-toolbar .timeline-edit-tools{position:static;transform:none;margin-left:auto}
+ .timeline-toolbar .timeline-range-actions{width:100%;justify-content:flex-end}
+}
+.timeline-time-column .clip-fade-handle{
+  width:8px;height:8px;top:2px;
+  border-radius:2px;
+  border:1px solid rgba(240,245,255,.9);
+  background:#7c83d7;
+  z-index:13;
+  transform:translate(-50%,0);
+  touch-action:none;
+  cursor:var(--acl-cursor-ew,ew-resize);
+  box-shadow:0 1px 3px rgba(0,0,0,.55);
+}
+.timeline-time-column .clip-fade-handle.fade-out{background:#b3baf5}
+.timeline-time-column .clip-fade-handle::before{
+  content:"";position:absolute;
+  inset:-5px;cursor:inherit;
+}
+.timeline-time-column .clip-trim-handle{
+  /* Reserve the top 16 px for fade handles. Trim from the side below it. */
+  position:absolute;top:16px;bottom:0;
+  width:9px;z-index:9;
+  cursor:var(--acl-cursor-col,col-resize);
+  touch-action:none;
+  background:transparent;
+  border-color:rgba(188,199,255,.88);
+}
+.timeline-time-column .clip-trim-handle.left{
+  left:0;border-left:2px solid rgba(188,199,255,.8);
+  border-top-left-radius:4px;border-bottom-left-radius:4px
+}
+.timeline-time-column .clip-trim-handle.right{
+  right:0;border-right:2px solid rgba(188,199,255,.8);
+  border-top-right-radius:4px;border-bottom-right-radius:4px
+}
+.timeline-time-column .clip-trim-handle:hover,
+.timeline-time-column .clip-trim-handle:active{
+  background:rgba(203,210,255,.22);
+  border-color:white;
+}
+.timeline-root.tool-blade .clip-trim-handle{pointer-events:none}
+.timeline-time-column .clip-fade-curve path{
+  stroke-width:1.5;opacity:.8;
+}
+.timeline-time-column .clip-volume-line{
+  height:2px;opacity:.7;
+}
+.timeline-sidebar-fixed .track-menu-button{
+  display:inline-flex;justify-content:center;align-items:center;
+  border:0;border-radius:5px;padding:1px 4px;
+  width:24px;min-width:24px;height:23px;
+  font-size:18px;letter-spacing:1px;line-height:19px;
+  background:transparent;color:#a9aabb;
+}
+.timeline-sidebar-fixed .track-menu-button:hover{
+  background:#24252c;color:white
+}
+.timeline-context-menu{
+  min-width:185px;
+  padding:5px;
+  z-index:2500;
+  border:1px solid #343641;
+  border-radius:8px;
+  background:#1b1c21;
+  box-shadow:0 8px 28px #000a;
+  display:flex;flex-direction:column;
+}
+.timeline-context-menu button{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 10px;min-height:33px;
+  border:0;border-radius:5px;
+  background:transparent;color:#eeeef3;
+  text-align:left;font-size:12px;cursor:var(--acl-cursor-pointer,pointer)
+}
+.timeline-context-menu button:hover{background:#30313d}
+.timeline-context-menu button.destructive{color:#ff9da7}
+.timeline-context-menu kbd{font:10px inherit;color:#9699a7;margin-left:14px}
+.timeline-pinned-clip-labels .pinned-clip-name span{
+  max-width:calc(100% - 14px);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.timeline-time-column .timeline-ruler-fixed{
+ position:absolute;top:0;left:0;right:0;width:100%;height:37px;z-index:13;
+ cursor:crosshair;touch-action:none;background:#111214;overflow:hidden
+}
+.timeline-time-column .timeline-ruler-fixed .acl-ruler{
+ width:100%;height:37px;pointer-events:none
+}
+.timeline-time-column .timeline-ruler-fixed .acl-tick{bottom:0}
+.timeline-time-column .timeline-ruler-fixed .acl-tick-label{
+ top:-24px;line-height:13px;font-size:10px;
+ background:#111214;padding-inline:3px;z-index:2
+}
+.timeline-time-canvas .timeline-ruler-spacer{
+ height:37px;min-height:37px;flex:0 0 37px;pointer-events:none
+}
+.timeline-time-column .timeline-time-tooltip{z-index:20}
+
+.timeline-pinned-clip-labels .pinned-row .lane-fx-badge{
+ position:absolute;top:4px;z-index:7;pointer-events:auto;
+ background:#26312b;border:1px solid #74b897;color:#b4ecc4;
+ border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;
+ cursor:pointer;
+}
+.lane-props-shade{z-index:1300}
+.lane-props-dialog{
+ width:min(650px,calc(100vw - 48px));
+ max-height:min(80vh,850px);display:flex;flex-direction:column;
+ background:#151619;border:1px solid #353640;border-radius:12px;
+ box-shadow:0 18px 55px #000b;overflow:hidden;
+}
+.lane-props-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2b2d36}
+.lane-props-heading h3{margin:0;font-size:15px}
+.lane-props-heading button{background:transparent;border:0;font-size:24px;color:#bfc0cd}
+.lane-props-scroll{overflow:auto;padding:14px 18px}
+.lane-props-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;border-radius:7px;background:#0f1014}
+.lane-props-meta div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.lane-props-meta strong{color:#8c90a0;font-size:11px}
+.lane-props-meta span{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:12px}
+.lane-props-meta p{grid-column:1/-1;font-size:11px;color:#a6a9b7}
+.lane-props-scroll h4{margin:16px 0 10px;font-size:13px}
+.lane-props-note{color:#a7aab5;font-size:11px;line-height:1.5}
+.lane-props-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #31323c}
+
+/* Magnetic edit guides appear only during a clip move or edge trim. */
+.timeline-toolbar .timeline-snap-toggle{
+  border-color:#45455a;color:#aeb3d1;white-space:nowrap;
+}
+.timeline-toolbar .timeline-snap-toggle.active{
+  border-color:#747be4;background:#272945;color:#e1e4ff;
+}
+.timeline-time-canvas>.timeline-snap-guide{
+  position:absolute;top:0;bottom:0;width:0;
+  border-left:1px dashed #b6a0ff;z-index:18;
+  pointer-events:none;
+  box-shadow:0 0 8px #8575df77;
+}
+.timeline-time-canvas>.timeline-snap-guide>span{
+  position:absolute;left:5px;top:4px;
+  border:1px solid #8d83c8;border-radius:3px;
+  background:#29233e;color:#e9e3ff;
+  padding:2px 5px;white-space:nowrap;font-size:10px;
+}
+
+.timeline-time-column .audio-clip-region.clip-disabled{opacity:.43;filter:grayscale(.85)}
+.timeline-time-column .audio-clip-region.clip-disabled:after{
+ content:"ОТКЛ.";position:absolute;right:10px;top:7px;z-index:9;
+ color:#fff;background:#24252ba8;border-radius:3px;padding:2px 4px;
+ font-size:10px;pointer-events:none
+}
+.timeline-time-column .audio-clip-region[style*="--acl-clip-color"]{
+ background:color-mix(in srgb,var(--acl-clip-color) 38%,#10131b);
+ border-top:2px solid var(--acl-clip-color);
+}
+.timeline-clip-colors{display:flex;gap:5px;padding:7px 10px}
+.timeline-context-menu .timeline-clip-colors button{
+ width:20px;height:20px;min-height:20px;padding:0;border:2px solid #ffffff60;
+ border-radius:5px
+}
+.timeline-context-menu .timeline-clip-colors button:hover{border-color:white;transform:scale(1.12)}
+
+.timeline-root .timeline-time-canvas .audio-clip-region.selected-clip{outline:2px solid #abb0ff;outline-offset:-2px;z-index:3}
+.timeline-toolbar .timeline-edit-tools{max-width:calc(100% - 250px);overflow-x:auto;scrollbar-width:none}
+.timeline-toolbar .timeline-edit-tools::-webkit-scrollbar{display:none}

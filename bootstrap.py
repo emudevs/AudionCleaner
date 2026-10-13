@@ -14,6 +14,7 @@ from pathlib import Path
 
 from common import (
     APP_ROOT,
+    DATA_ROOT,
     APP_VERSION,
     INSTALL_SCHEMA,
     RUNTIME_FILE,
@@ -21,8 +22,9 @@ from common import (
     save_runtime,
 )
 
-VENV = APP_ROOT / ".venv"
-MARKER = APP_ROOT / ".installed.json"
+VENV = DATA_ROOT / ".venv"
+MARKER = DATA_ROOT / ".installed.json"
+READY_MARKER = DATA_ROOT / ".ready.json"
 
 FFMPEG_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 AUDIO_SEPARATOR_VERSION = "0.47.0"
@@ -68,6 +70,7 @@ def has_nvidia() -> bool:
 
 
 def make_venv(force=False) -> None:
+    VENV.parent.mkdir(parents=True, exist_ok=True)
     if force and VENV.exists():
         log("Удаляю старое виртуальное окружение...")
         shutil.rmtree(VENV, ignore_errors=True)
@@ -152,6 +155,7 @@ def install_packages(force=False) -> dict:
             ]
         )
 
+    MARKER.parent.mkdir(parents=True, exist_ok=True)
     MARKER.write_text(
         json.dumps(
             {
@@ -261,6 +265,33 @@ def install_ffmpeg(force=False) -> tuple[str, str]:
     return tuple(str(p) for p in binaries)
 
 
+def install_default_models() -> None:
+    """Prepare the default ensemble locally before allowing offline startup.
+
+    Future presets are downloaded by audio-separator on first selection.
+    """
+    from processor import preset_model_names
+    import logging
+    from audio_separator.separator import Separator
+
+    names = preset_model_names("instrumental_full")
+    if not names:
+        raise RuntimeError("Не удалось прочитать список моделей начального пресета")
+    cache = DATA_ROOT / "models"
+    cache.mkdir(parents=True, exist_ok=True)
+    separator = Separator(model_file_dir=str(cache), log_level=logging.INFO)
+    for index, filename in enumerate(names, 1):
+        stored = cache / filename
+        if stored.is_file() and stored.stat().st_size > 1024 * 1024:
+            log(f"Модель {index}/{len(names)} уже установлена: {filename}")
+            continue
+        log(f"Загружаю модель {index}/{len(names)}: {filename}")
+        separator.download_model_and_data(filename)
+        if not stored.is_file() or stored.stat().st_size < 1024 * 1024:
+            raise RuntimeError(f"Загрузка модели не завершилась: {filename}")
+    log("Начальный пресет instrumental_full готов к офлайн-обработке.")
+
+
 def environment_report() -> dict:
     script = r"""
 import json
@@ -322,6 +353,7 @@ def main() -> int:
         ffmpeg, ffprobe = install_ffmpeg(force=args.repair)
         make_venv(force=args.repair)
         install_info = install_packages(force=args.repair)
+        install_default_models()
 
         report = environment_report()
         runtime = {
@@ -342,6 +374,16 @@ def main() -> int:
                 "Программа запустится на CPU. Используй repair.bat после обновления драйвера."
             )
 
+        READY_MARKER.parent.mkdir(parents=True, exist_ok=True)
+        ready = {
+            "app_version": APP_VERSION,
+            "schema": INSTALL_SCHEMA,
+            "python": str(venv_python()),
+            "models": "instrumental_full",
+        }
+        staged = READY_MARKER.with_suffix(".tmp")
+        staged.write_text(json.dumps(ready, ensure_ascii=False), encoding="utf-8")
+        staged.replace(READY_MARKER)
         log("\nГотово.")
         return 0
 

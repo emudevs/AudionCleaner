@@ -1,0 +1,92 @@
+/* Shared spacing and header treatment of the reference. */
+:root{--acl-panel-gap:10px}
+.bar{
+  height:44px;min-height:44px;padding:5px 12px;
+  background:#0c0d0f;gap:10px
+}
+.bar .file{display:flex;align-items:center;gap:9px;max-width:55%;padding:5px 3px}
+.bar .file .back-arrow{width:22px;height:22px;display:grid;place-items:center;padding:0;background:#191a1e;border-radius:5px}
+.bar .file .back-arrow img{width:9px;height:9px}
+.bar .file .filename{font-size:13px;font-weight:500}
+.bar .file>img:last-child{width:10px;height:10px;margin-left:2px}
+.bar .actions{gap:7px}
+.bar .actions button{min-height:29px;font-size:12px;border-radius:5px;padding:6px 13px}
+.editor-work{padding:9px 10px;min-height:0}
+.editor-upper>.sidebar{padding-right:2px;gap:var(--acl-panel-gap)}
+.editor-upper>.right-side{padding-left:2px}
+.panel{border-radius:6px;background:#111214}
+.panel>.heading,.panel>.panel-button{
+  box-sizing:border-box;
+  width:100%;min-height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  text-align:left;padding:9px 12px;
+  line-height:20px;font-size:13px;font-weight:600;
+  background:transparent;border:none;border-radius:5px;color:#f0f0f2
+}
+.panel>.panel-button:hover:not(:disabled){background:#18191c}
+.panel>.panel-button img{width:10px;height:10px;flex:0 0 auto}
+.preview{height:100%;min-height:0;display:flex;flex-direction:column}
+.preview-heading-button{flex:0 0 auto;cursor:pointer}
+.preview-collapsed{height:auto;min-height:38px}
+.preview-collapsed>.screen,.preview-collapsed>.times,
+.preview-collapsed>.acl-ruler,.preview-collapsed>.preview-seek,
+.preview-collapsed>.transport{display:none}
+.preview-collapsed>.preview-heading-button{margin-bottom:0}
+.layout-v-resizer{width:7px;min-width:7px}
+.mixer-track{height:80px}
+.mixer-meter{position:relative;overflow:visible}
+.mixer-meter .meter-fader-cap{
+  position:absolute;pointer-events:none;z-index:4;
+  width:6px;height:6px;background:#f5f5f7;border-radius:50%;
+  transform:translateX(-50%);
+  box-shadow:0 0 2px rgba(0,0,0,.3);
+}
+.mixer-meter-disabled .meter-fader-cap{background:#777780}
+.mixer-meter .meter-fader-cap-top{top:-2px}
+.mixer-meter .meter-fader-cap-bottom{bottom:-2px}
+.processing-dialog .force-stop{
+  background:#412a33;color:#ffc5d1;border:1px solid #885064;
+  padding:7px 13px;border-radius:5px;
+}
+.processing-dialog .force-stop:hover{background:#613341}
+.transport .master-mute{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:5px;width:32px;height:30px;
+  border-radius:5px;cursor:pointer;background:transparent
+}
+.transport .master-mute:hover:not(:disabled){background:#252630}
+.transport .master-mute.is-muted{background:#27212b}
+.transport .master-mute img.master-icon{
+  width:22px!important;height:22px!important;margin:0!important
+}
+.transport .master-mute:focus-visible{outline:2px solid #656aff}
+.transport .master-mute:disabled{cursor:default;opacity:.4}
+
+/* Preview header belongs to the full panel width, not its 12px content inset. */
+.editor-upper .right-side > .preview > .preview-heading-button {
+  box-sizing: border-box;
+  width: calc(100% + 24px);
+  min-width: 0;
+  margin: 0 -12px;
+  padding: 9px 12px;
+  flex: 0 0 auto;
+}
+
+/* A collapsed effects panel must not reserve the remaining sidebar height. */
+.editor-upper .sidebar > .effects-panel.effects-panel-collapsed {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+.editor-upper .sidebar > .effects-panel.effects-panel-collapsed > .panel-button {
+  flex: 0 0 38px;
+}
+
+/* The closed preview is exactly one header high: no 9px bottom tail. */
+.editor-upper .right-side > .preview.preview-collapsed {
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  padding-bottom: 0;
+  overflow: hidden;
+}

@@ -1,0 +1,51 @@
+.timeline{min-height:0;overflow:auto;padding:7px 8px;position:relative;scrollbar-color:#303139 transparent;scrollbar-width:thin}
+.timeline-empty{cursor:pointer;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#1b1c2c;border:1px dashed #5d60eb;border-radius:6px;text-align:center;font-size:12px;line-height:1.5;font-weight:600}
+.empty-symbol{font-size:31px;margin-bottom:14px}
+.timeline-editor{min-height:100%;position:relative;--track-sidebar:208px}
+.timeline-ruler{height:27px;display:grid;grid-template-columns:var(--track-sidebar) 1fr}
+.timeline-timing{display:flex;align-items:flex-start;gap:14px;padding:4px}
+.timeline-timing strong{color:#686bf5}
+.timeline-timing span,.timeline-timing b{color:#81818a}
+.timeline-lanes{display:flex;flex-direction:column;gap:3px;position:relative}
+.timeline-row{display:grid;grid-template-columns:var(--track-sidebar) minmax(0,1fr);gap:3px;min-height:48px}
+.timeline-row.add-row{min-height:26px}
+.add-row button{border:0;background:#0c0d0f;border-radius:3px;padding:5px 7px;font-weight:600}
+.add-row div{background:#111214}
+.track-label{background:#0b0c0e;border-radius:4px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0}
+.track-label.disabled{color:#666673}
+.track-label img{height:19px;width:19px}
+.track-label b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:auto}
+.track-remove{border:0;background:transparent;color:#8a8a91;font-size:16px;padding:3px 4px}
+.track-remove:hover:not(:disabled){color:#fb7b8b}
+.video-clip,.audio-clip{border-radius:4px;min-width:0;overflow:hidden;height:48px;position:relative;display:flex;align-items:center;background:#00536c}
+.video-clip img.clip-thumb{width:49px;height:45px;object-fit:cover;margin-left:2px;flex-shrink:0}
+.video-clip span{padding:5px 7px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:flex-start}
+.audio-clip{background:#044867}
+.audio-clip.clean{background:#365c20}
+.audio-clip.import{background:#543471}
+.clip-caption{z-index:1;position:absolute;left:5px;right:5px;top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px;font-weight:600}
+.waveform{position:absolute;bottom:0;left:0;width:100%;height:30px}
+.audio-clip.missing{background:#272953;justify-content:space-between;gap:7px;padding:8px 12px;font-size:11px}
+.audio-clip.missing button{background:#555beb;border:0;white-space:nowrap}
+.wave-loading{font-size:11px;color:#d1dae2;margin-left:10px}
+.playhead-region{position:absolute;inset:0 12px 0 208px;pointer-events:none;z-index:3}
+.playhead{position:absolute;top:18px;bottom:0;pointer-events:none;border-left:1px solid #7477fc}
+.playhead:before{content:'';position:absolute;width:7px;height:7px;background:#7477fc;top:-3px;left:-4px;border-radius:2px}
+.invisible-media{display:none}
+.dialog-shade,.processing-shade{position:absolute;z-index:100;inset:0;background:#000b;display:flex;align-items:center;justify-content:center}
+.audio-dialog{width:min(470px,95vw);background:#1a1b1f;padding:15px;border:1px solid #393b43;border-radius:12px;box-shadow:0 10px 60px #000a}
+.audio-dialog h3{margin:0 0 15px;font-size:15px}
+.dialog-file{padding:9px 0;overflow-wrap:anywhere;font-weight:600}
+.audio-dialog p{margin-top:25px}
+.audio-option{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #303039;cursor:pointer}
+.audio-option small{margin-left:auto;color:#8b8b96}
+.audio-option input{accent-color:#6266ee}
+.dialog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:25px}
+.processing-dialog{width:min(560px,90vw);display:flex;flex-direction:column;align-items:center;gap:20px}
+.processing-bar{width:100%;background:#eee;height:4px;border-radius:6px;overflow:hidden}
+.processing-bar span{display:block;height:100%;background:#5c62ee;transition:width 150ms}
+.toast-error,.busy{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:150;max-width:min(800px,90vw);padding:14px 20px;background:#45232c;color:#fff;border-radius:8px;box-shadow:0 10px 35px #0008}
+.toast-error button{margin-left:14px;background:transparent;border:0;font-size:17px}
+.busy{background:#242650}
+.drag-overlay{position:absolute;inset:0;background:#272952e8;z-index:200;border:2px dashed #797cfb;display:flex;align-items:center;justify-content:center;font-size:18px}
+@media(max-height:750px){.editor-work{grid-template-rows:minmax(280px,1fr) minmax(200px,35%)}.mixer-line{min-height:53px}.mixer-content{max-height:185px}}

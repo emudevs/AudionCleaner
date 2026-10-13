@@ -6,9 +6,12 @@ import shutil
 from pathlib import Path
 
 APP_ROOT = Path(__file__).resolve().parent
+# Installed ACL keeps mutable settings, models and its Python venv in the user's
+# profile, never under Program Files / Electron's read-only resources.
+DATA_ROOT = Path(os.environ["ACL_DATA_DIR"]).expanduser().resolve() if os.environ.get("ACL_DATA_DIR") else APP_ROOT
 TOOLS_DIR = APP_ROOT / "tools"
-RUNTIME_FILE = APP_ROOT / "runtime.json"
-SETTINGS_FILE = APP_ROOT / "settings.json"
+RUNTIME_FILE = DATA_ROOT / "runtime.json"
+SETTINGS_FILE = DATA_ROOT / "settings.json"
 
 APP_VERSION = "1.0.0"
 INSTALL_SCHEMA = 1
@@ -59,7 +62,7 @@ DEFAULT_SETTINGS = {
     "keep_prepared_audio": False,
     "keep_raw_separated": False,
     "last_dir": "",
-    "model_cache_dir": str(APP_ROOT / "models"),
+    "model_cache_dir": str(DATA_ROOT / "models"),
 }
 
 
@@ -120,6 +123,7 @@ def load_json(path: Path, default):
 
 
 def save_json(path: Path, data) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

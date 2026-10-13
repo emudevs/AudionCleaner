@@ -1,0 +1,105 @@
+/* ACL waveform-envelope editing and fixed utility row heights. */
+.timeline-time-column .audio-clip-region{
+  --acl-gain-x:50%;
+}
+.timeline-time-column .audio-clip-region .clip-gain-knob{
+  display:block;
+  position:absolute;
+  z-index:12;
+  left:var(--acl-gain-x);
+  bottom:5px;
+  width:18px;height:18px;
+  padding:0;
+  transform:translateX(-50%);
+  background:#dbe2fd;
+  border:2px solid #484c68;
+  border-radius:50%;
+  box-shadow:0 1px 5px #000c;
+  opacity:0;
+  pointer-events:none;
+  touch-action:none;
+  cursor:var(--acl-cursor-ns,ns-resize);
+  transition:opacity 70ms;
+}
+.timeline-time-column .clip-draggable:hover .clip-gain-knob,
+.timeline-time-column .clip-draggable:focus-within .clip-gain-knob,
+.timeline-time-column .clip-gain-knob:active{
+  opacity:1;
+  pointer-events:auto;
+}
+.timeline-time-column .clip-gain-knob>span{
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  min-width:46px;
+  width:max-content;
+  padding:3px 5px;
+  font-size:10px;
+  line-height:15px;
+  border-radius:4px;
+  color:#ebefff;
+  background:#22242d;
+  box-shadow:0 2px 6px #0009;
+  text-align:center;
+  pointer-events:none;
+}
+.timeline-time-column .clip-fade-bend{
+  position:absolute;
+  width:9px;height:9px;
+  transform:translate(-50%,-50%);
+  z-index:14;
+  border:1px solid #e6ecfd;
+  border-radius:50%;
+  background:#8189cc;
+  cursor:var(--acl-cursor-ns,ns-resize);
+  box-shadow:0 1px 4px #000b;
+  touch-action:none;
+}
+.timeline-time-column .clip-fade-bend:hover{background:white;border-color:#6168c9}
+.timeline-root.tool-blade .clip-gain-knob,
+.timeline-root.tool-blade .clip-fade-bend{pointer-events:none!important;opacity:0!important}
+
+/* The video and the 'create Clean' prompt must not scale vertically. */
+.timeline-sidebar-fixed .timeline-sidebar-row.track-label:not(.lane-audio-label),
+.timeline-sidebar-fixed .timeline-sidebar-row.track-label.disabled,
+.timeline-time-canvas>.timeline-time-row.video-clip,
+.timeline-time-canvas>.timeline-time-row.audio-clip.missing,
+.timeline-pinned-clip-labels .pinned-clip-name:not(.pinned-audio-label),
+.timeline-pinned-clip-labels .pinned-empty-space{
+  height:48px!important;
+  min-height:48px!important;
+  flex-basis:48px!important;
+}
+.timeline-pinned-clip-labels .pinned-ruler-space{
+  height:37px!important;min-height:37px!important;flex-basis:37px!important
+}
+.timeline-pinned-clip-labels .pinned-add-space{
+  height:26px!important;min-height:26px!important;flex-basis:26px!important
+}
+.timeline-time-column .timeline-clean-overlay{
+  height:48px!important;min-height:48px!important;
+}
+/* The knob is a control, not a gain automation line. */
+.timeline-time-column .clip-volume-line{display:none!important}
+
+/* A 30px full-width hit zone on each clip handles gain gestures.
+   The dot remains a visual indicator, not the only target. */
+.timeline-root.tool-mouse .audio-clip-region:hover{
+  cursor:var(--acl-cursor-default,default);
+}
+.timeline-time-column .audio-clip-region .clip-gain-knob{
+  filter:drop-shadow(0 0 2px #000b);
+}
+.timeline-time-column .clip-draggable:hover .clip-gain-knob{
+  opacity:1;
+}
+
+/* Editing modes are exclusive: a click in mouse mode always moves the clip. */
+.timeline-root:not(.tool-gain) .audio-clip-region .clip-gain-knob{opacity:0!important;pointer-events:none!important}
+.timeline-root.tool-gain .audio-clip-region .clip-gain-knob{opacity:1!important;pointer-events:auto!important}
+.timeline-root.tool-gain .audio-clip-region{cursor:ns-resize!important}
+.timeline-root.tool-mute .audio-clip-region{cursor:pointer!important}
+.timeline-root:not(.tool-mouse) .clip-trim-handle,
+.timeline-root:not(.tool-mouse) .clip-fade-handle,
+.timeline-root:not(.tool-mouse) .clip-fade-bend{pointer-events:none!important}

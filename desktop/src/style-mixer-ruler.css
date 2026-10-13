@@ -1,0 +1,255 @@
+/* ACL design-system refinements sourced from screens/ reference exports. */
+:root {font-size:13px}
+.bar button,.actions button{font-size:12px}
+.heading,.panel-button{font-size:14px;line-height:20px}
+.mixer-panel .heading{padding-top:11px;padding-bottom:9px}
+.mixer-content{padding:0 10px 10px;max-height:300px;overflow:auto}
+.mixer-track{
+  min-width:0;
+  height:77px;
+  display:grid;
+  grid-template-columns:65px 30px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  padding:4px 10px 5px;
+  background:#0c0d0e;
+  border-radius:5px;
+  margin-bottom:5px;
+}
+.mixer-track.unavailable{opacity:.28;pointer-events:none}
+.mixer-track-info{
+  height:64px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:7px;
+}
+.mixer-track-info strong{
+  font-size:13px;
+  font-weight:600;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.mixer-track .mixer-switches{display:flex;align-items:center;gap:4px}
+.mixer-track .mixer-switches button{
+  flex:none;
+  width:24px;
+  height:23px;
+  min-width:0;
+  padding:0;
+  border:0;
+  border-radius:4px;
+  background:#191a1e;
+  color:#afb0b8;
+  font-size:11px;
+}
+.mixer-track .mixer-switches button.selected{
+  background:#5e62ec;
+  color:#fff;
+}
+.balance-control{
+  width:29px;
+  height:62px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  user-select:none;
+  flex-shrink:0;
+}
+.balance-side{
+  font-size:12px;
+  font-weight:700;
+  line-height:16px;
+  color:#ededf0;
+}
+.balance-knob{
+  width:25px;
+  height:23px;
+  display:grid;
+  place-items:center;
+  flex:none;
+  padding:0;
+  border:0;
+  background:transparent;
+  border-radius:50%;
+  touch-action:none;
+  cursor:ew-resize;
+}
+.balance-knob:hover:not(:disabled){background:transparent;filter:brightness(1.12)}
+.balance-knob:focus-visible{outline:2px solid #7477ff;outline-offset:2px}
+.balance-knob svg{display:block}
+.mixer-meter{
+  position:relative;
+  min-width:0;
+  height:64px;
+  display:grid;
+  grid-template-rows:21px 16px 21px;
+  align-content:center;
+  padding:2px 4px 2px 1px;
+}
+.mixer-meter .meter-lane{
+  position:relative;
+  min-width:0;
+  width:100%;
+  height:21px;
+  border-radius:5px;
+  overflow:hidden;
+  margin:0;
+  background:#050506;
+}
+.mixer-meter .meter-fill{
+  height:100%;
+  background:linear-gradient(90deg,#3c904d 0%,#a6a14c 52%,#d48e42 74%,#f2763d 100%);
+  transition:width 45ms linear;
+}
+.mixer-meter .zero-db{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:1px;
+  border-left:1px solid #ed7c30;
+}
+.mixer-meter .meter-peak{
+  position:absolute;
+  width:1px;
+  height:100%;
+  top:0;
+  background:#ff9840;
+}
+.mixer-meter .meter-scale{
+  position:relative;
+  width:100%;
+  height:16px;
+  top:auto;
+  left:auto;
+  right:auto;
+  color:#66666c;
+  pointer-events:none;
+  font-size:9px;
+  line-height:14px;
+  overflow:hidden;
+}
+.mixer-meter .meter-scale-label{
+  position:absolute;
+  top:0;
+  font-size:9px;
+  transform:translateX(-50%);
+  font-variant-numeric:tabular-nums;
+}
+.mixer-meter .meter-minus-infinity{
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:9px;
+  color:#66666c;
+}
+.mixer-meter .meter-max{
+  position:absolute;
+  top:0;
+  right:1px;
+  font-size:9px;
+  font-weight:700;
+  color:#7478ff;
+  background:#060607;
+  padding-left:2px;
+}
+.mixer-meter .meter-fader{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:1px;
+  width:calc(100% - 5px);
+  height:100%;
+  margin:0;
+  padding:0;
+  appearance:none;
+  -webkit-appearance:none;
+  background:transparent;
+  outline:none;
+  cursor:ew-resize;
+  z-index:3;
+}
+.mixer-meter .meter-fader::-webkit-slider-runnable-track{
+  height:0;
+  border:0;
+  background:transparent;
+}
+.mixer-meter .meter-fader::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:3px;
+  height:65px;
+  margin-top:-32px;
+  background:#f6f6fa;
+  border:0;
+  border-radius:3px;
+  box-shadow:0 -1px 0 2px rgba(255,255,255,.18);
+}
+.mixer-meter-disabled .meter-fader::-webkit-slider-thumb{background:#55555b}
+
+/* Time rulers: exactly 14 minor subdivisions between adjacent major marks. */
+.acl-ruler{
+  position:relative;
+  width:100%;
+  flex-shrink:0;
+  height:18px;
+  cursor:crosshair;
+  background:none!important;
+  overflow:visible;
+}
+.acl-ruler-labeled{height:32px}
+.acl-tick{
+  position:absolute;
+  bottom:0;
+  height:6px;
+  width:1px;
+  background:#bfc0c9;
+  pointer-events:none;
+  transform:translateX(-.5px);
+}
+.acl-tick-major{height:14px;background:#e0e0e8}
+.acl-tick-label{
+  position:absolute;
+  top:-3px;
+  left:0;
+  font-size:10px;
+  font-weight:500;
+  line-height:12px;
+  white-space:nowrap;
+  color:#e0e0e5;
+  transform:translateX(-50%);
+  font-variant-numeric:tabular-nums;
+}
+.acl-tick:first-child .acl-tick-label{transform:none}
+.acl-tick:last-child .acl-tick-label{transform:translateX(-100%)}
+.timeline-ruler{height:32px}
+.timeline-scale{border:0}
+.timeline-timing{align-items:center;padding:0 6px;gap:12px;font-size:12px}
+.timeline-timing strong{font-size:13px;color:#686eff}
+.timeline-timing b{font-size:12px}
+.preview-ruler.acl-ruler{height:19px;margin-top:4px}
+.preview-ruler .acl-tick-major{height:14px}
+.preview-ruler .acl-tick-minor{height:6px}
+
+/* Typography corrected to the reference proportions. */
+.settings-heading,.settings-subheading{font-size:13px}
+.setting-line label{font-size:13px}
+.setting select,.setting input{font-size:12px;height:28px}
+.setting-hint{font-size:11px;line-height:1.5}
+.save-settings{font-size:12px}
+.track-label b{font-size:13px}
+.add-row button{font-size:13px}
+.clip-caption,.video-clip span{font-size:10px}
+.audio-clip.missing{font-size:12px}
+.audio-clip.missing button{font-size:12px}
+.times strong{font-size:14px}
+.fit-control{font-size:12px}
+@media(max-width:1150px){
+  .mixer-track{grid-template-columns:61px 27px minmax(0,1fr);gap:4px;padding-inline:6px}
+  .mixer-meter .meter-scale-label{font-size:8px}
+  .setting-line label{font-size:12px}
+}

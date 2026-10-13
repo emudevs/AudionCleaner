@@ -1,0 +1,58 @@
+/* Finished audio clips can be positioned non-destructively on the timeline. */
+.timeline-time-column .audio-clip-region.clip-draggable{
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
+}
+.timeline-time-column .audio-clip-region.clip-draggable:active{cursor:grabbing}
+.timeline-time-column .audio-clip-region.clip-draggable:hover{
+  box-shadow:inset 0 0 0 1px rgba(182,187,255,.72);
+}
+.timeline-clip-offset{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-height:24px;
+  color:#aeb0bb;
+  font-size:11px;
+}
+.timeline-clip-offset span{
+  max-width:145px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.timeline-clip-offset input{
+  width:86px;
+  min-width:66px;
+  height:24px;
+  background:#0d0e12;
+  border:1px solid #31333d;
+  border-radius:5px;
+  outline:0;
+  color:#e4e6f2;
+  padding:3px 7px;
+  text-align:right;
+  font-family:inherit;
+  font-variant-numeric:tabular-nums;
+  font-size:11px;
+}
+.timeline-clip-offset input:focus{border-color:#676af5}
+.timeline-clip-offset small{font-size:10px;color:#90929f}
+.timeline-clip-offset button{
+  height:23px;
+  min-width:23px;
+  padding:2px 5px;
+  color:#bdbecc;
+  background:#1d1e23;
+  border:1px solid #32333c;
+  border-radius:5px;
+}
+.timeline-clip-offset button:hover{background:#2b2c34}
+.timeline-time-column .timeline-clean-overlay{
+  justify-content:space-between;
+}
+.timeline-time-column .timeline-clean-overlay button{
+  pointer-events:auto;
+}

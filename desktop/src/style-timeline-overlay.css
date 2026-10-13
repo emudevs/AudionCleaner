@@ -1,0 +1,47 @@
+/*
+ * Clean placeholder controls belong to the viewport, not the horizontally
+ * zoomed media canvas. Keep the gradient clip in the canvas and pin the text
+ * and action as a separate, unobstructed foreground layer.
+ */
+.timeline-root{position:relative;overflow:hidden}
+.timeline-clean-overlay{
+  position:absolute;
+  right:8px;
+  z-index:12;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:5px 10px 5px 12px;
+  pointer-events:none;
+  min-width:0;
+  color:#efefff;
+  font-size:12px;
+  line-height:1.25;
+}
+.timeline-clean-overlay span{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+  flex:1;
+}
+.timeline-clean-overlay button{
+  flex:none;
+  white-space:nowrap;
+  pointer-events:auto;
+  cursor:pointer;
+  color:white;
+  background:#555bef;
+  border:1px solid #555bef;
+  border-radius:6px;
+  padding:7px 13px;
+  font-size:12px;
+}
+.timeline-clean-overlay button:hover{background:#6870ff}
+@media(max-width:780px){
+  .timeline-clean-overlay button{padding-inline:7px;font-size:11px}
+  .timeline-clean-overlay{gap:5px;padding-inline:5px}
+}
