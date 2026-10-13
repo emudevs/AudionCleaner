@@ -92,7 +92,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "${productName}-${version}-${arch}-${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "mac": {
       "target": [
@@ -115,5 +115,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
+  },
+  "homepage": "https://github.com/emudevs/AudionCleaner",
+  "author": {
+    "name": "emudevs",
+    "email": "15932336+emudevs@users.noreply.github.com"
   }
 }
